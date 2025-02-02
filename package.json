@@ -6,6 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
+    "db": "npx convex dev",
     "lint": "next lint"
   },
   "dependencies": {
