@@ -12,6 +12,7 @@ import { LayoutGrid, LucideShieldCheck, Settings, Shield } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserButtonMenu } from "./UserButton";
+import UploadPDFDialog from "./UploadPDFDialog";
 
 const Sidebar = () => {
   const path = usePathname();
@@ -49,7 +50,7 @@ const Sidebar = () => {
       </div>
 
       <div className="mt-10">
-        <Button className="w-full">+ upload PDF</Button>
+        <UploadPDFDialog />
         {/* Menu List */}
         <div className="mt-9 w-full flex flex-col space-y-6">
           {menuList.map((menu) => (

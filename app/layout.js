@@ -2,6 +2,7 @@ import { Geist, Geist_Mono, Outfit } from "next/font/google";
 import "./globals.css";
 import { ConvexClientProvider } from "./ConvexClientProvider";
 import { ClerkProvider } from "@clerk/nextjs";
+import { Toaster } from "@/components/ui/sonner";
 
 const outfit = Outfit({
   variable: "--font-geist-sans",
@@ -22,10 +23,9 @@ export default function RootLayout({ children }) {
   return (
     <ClerkProvider>
       <html lang="en">
-        <body
-          className={`${outfit.className} antialiased`}
-        >
+        <body className={`${outfit.className} antialiased`}>
           <ConvexClientProvider>{children}</ConvexClientProvider>
+          <Toaster richColors />
         </body>
       </html>
     </ClerkProvider>
