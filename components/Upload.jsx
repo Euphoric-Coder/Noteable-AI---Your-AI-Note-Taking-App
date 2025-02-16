@@ -155,7 +155,7 @@ const Upload = ({
         <Input
           ref={fileInputRef} // Attach the reference
           type="file"
-          accept=".csv"
+          accept=".pdf"
           onChange={handleFileChange}
           className="hidden"
           id="csv-upload"

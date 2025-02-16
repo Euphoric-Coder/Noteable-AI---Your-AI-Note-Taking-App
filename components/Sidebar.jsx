@@ -57,11 +57,7 @@ const Sidebar = () => {
             <Link key={menu.id} href={menu.path}>
               <div
                 className={`flex items-center gap-5 px-6 py-4 rounded-3xl cursor-pointer transition-transform duration-500 hover:bg-gradient-to-br from-blue-200/60 via-purple-200/50 to-pink-200/40 dark:hover:bg-gradient-to-br dark:from-blue-700 dark:via-purple-700 dark:to-pink-700 hover:shadow-lg dark:hover:shadow-[0px_10px_40px_rgba(100,150,255,0.3)] transform hover:scale-105 ${
-                  // (path === menu.path ||
-                  //   (menu.path === "/dashboard/budgets" &&
-                  //     path.startsWith(`/dashboard/budgets/`)) ||
-                  //   (menu.path === "/dashboard/income" &&
-                  //     path.startsWith(`/dashboard/income/`))) &&
+                  (path === menu.path ) &&
                   "bg-gradient-to-br from-blue-300/70 via-purple-300/60 to-pink-300/50 dark:bg-gradient-to-br dark:from-blue-800 dark:via-purple-800 dark:to-pink-800 shadow-lg dark:shadow-[0px_5px_20px_rgba(100,100,255,0.4)]"
                 }`}
               >
