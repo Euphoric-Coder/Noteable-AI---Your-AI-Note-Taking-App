@@ -3,6 +3,7 @@
 import React, { useState, useRef, useCallback } from "react";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogHeader,
@@ -17,9 +18,15 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { useUser } from "@clerk/nextjs";
+import { v4 as uuidv4 } from "uuid";
 
 const UploadPDFDialog = () => {
-  const generateUploadUrl = useMutation(api.uploadURL.generateUploadUrl);
+  const { user } = useUser();
+  const generateUploadUrl = useMutation(api.uploadFile.generateUploadUrl);
+  const addPDF = useMutation(api.uploadFile.addFile);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [fileName, setFileName] = useState("");
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -79,7 +86,16 @@ const UploadPDFDialog = () => {
         body: file,
       });
       const { storageId } = await result.json();
-      console.log(storageId)
+      console.log(storageId);
+      console.log(fileName);
+
+      // Step 3: Save the newly allocated storage id to the database
+      await addPDF({
+        fileId: uuidv4(),
+        storageId: storageId,
+        fileName: fileName,
+        createdBy: user?.primaryEmailAddress.emailAddress,
+      });
 
       if (result.ok) {
         toast.success("File uploaded successfully!");
@@ -91,19 +107,23 @@ const UploadPDFDialog = () => {
       toast.error("An error occurred during the upload.");
     } finally {
       setLoading(false);
+      setIsDialogOpen(false);
     }
     console.log(file);
   };
 
   return (
     <Dialog
+      open={isDialogOpen}
       onOpenChange={() => {
         setLoading(false);
         setFile(null);
       }}
     >
       <DialogTrigger asChild>
-        <Button className="w-full">+ Upload PDF</Button>
+        <Button className="w-full" onClick={() => setIsDialogOpen(true)}>
+          + Upload PDF
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -143,13 +163,31 @@ const UploadPDFDialog = () => {
           />
         </div>
         {file && (
-          <div className="mt-4 text-gray-700">
-            <strong>Selected File:</strong> {file.name}
+          <div className="mt-4 flex flex-col text-gray-700">
+            <p>
+              <strong>Selected File:</strong> {file.name}
+            </p>
+            <label htmlFor="file-name" className="mt-4 font-bold ">
+              File Name
+            </label>
+            <Input
+              id="file-name"
+              type="text"
+              placeholder="File Name"
+              defaultValue={fileName}
+              onChange={(e) => setFileName(e.target.value)}
+              className="mt-1"
+            />
           </div>
         )}
-        <Button onClick={onUpload} className="mt-6 w-full">
-          {loading ? <Loader2 className="animate-spin" /> : "Upload"}
-        </Button>
+        <div className="w-full flex items-center justify-between gap-4">
+          <Button className="w-full" onClick={() => setIsDialogOpen(false)}>
+            Cancel
+          </Button>
+          <Button onClick={onUpload} className="w-full">
+            {loading ? <Loader2 className="animate-spin" /> : "Upload"}
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );

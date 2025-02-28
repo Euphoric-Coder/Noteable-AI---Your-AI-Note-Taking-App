@@ -14,7 +14,7 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as storeFile from "../storeFile.js";
-import type * as uploadURL from "../uploadURL.js";
+import type * as uploadFile from "../uploadFile.js";
 import type * as user from "../user.js";
 
 /**
@@ -27,7 +27,7 @@ import type * as user from "../user.js";
  */
 declare const fullApi: ApiFromModules<{
   storeFile: typeof storeFile;
-  uploadURL: typeof uploadURL;
+  uploadFile: typeof uploadFile;
   user: typeof user;
 }>;
 export declare const api: FilterApi<

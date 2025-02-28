@@ -1,6 +1,5 @@
 "use client";
 
-import Test from "@/components/Test";
 import { api } from "@/convex/_generated/api";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { useMutation } from "convex/react";
@@ -25,7 +24,6 @@ const page = () => {
   return (
     <div className="text-3xl font-extrabold text-blue-500">
       This is just a test page
-      <Test />
       <UserButton />
     </div>
   );
