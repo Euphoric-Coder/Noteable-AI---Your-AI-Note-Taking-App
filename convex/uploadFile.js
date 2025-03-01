@@ -10,6 +10,7 @@ export const addFile = mutation({
     fileId: v.string(),
     storageId: v.string(),
     fileName: v.string(),
+    fileURL: v.string(),
     createdBy: v.string(),
   },
   handler: async (ctx, args) => {
@@ -17,6 +18,7 @@ export const addFile = mutation({
       fileId: args.fileId,
       storageId: args.storageId,
       fileName: args.fileName,
+      fileURL: args.fileURL,
       createdBy: args.createdBy,
     });
     return 'File added successfully';

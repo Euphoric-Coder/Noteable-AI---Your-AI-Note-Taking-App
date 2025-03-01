@@ -25,6 +25,7 @@ const UploadPDFDialog = () => {
   const { user } = useUser();
   const generateUploadUrl = useMutation(api.uploadFile.generateUploadUrl);
   const addPDF = useMutation(api.uploadFile.addFile);
+  const getURL = useMutation(api.storeFile.getFileURL);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [fileName, setFileName] = useState("");
   const [file, setFile] = useState(null);
@@ -86,14 +87,14 @@ const UploadPDFDialog = () => {
         body: file,
       });
       const { storageId } = await result.json();
-      console.log(storageId);
-      console.log(fileName);
+      const fileURL = await getURL({ storageId: storageId });
 
       // Step 3: Save the newly allocated storage id to the database
       await addPDF({
         fileId: uuidv4(),
         storageId: storageId,
         fileName: fileName,
+        fileURL: fileURL,
         createdBy: user?.primaryEmailAddress.emailAddress,
       });
 
@@ -182,7 +183,7 @@ const UploadPDFDialog = () => {
         )}
         <div className="w-full flex items-center justify-between gap-4">
           <Button className="w-full" onClick={() => setIsDialogOpen(false)}>
-            Cancel
+            Close
           </Button>
           <Button onClick={onUpload} className="w-full">
             {loading ? <Loader2 className="animate-spin" /> : "Upload"}
