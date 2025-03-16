@@ -20,6 +20,7 @@ import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
 import { v4 as uuidv4 } from "uuid";
+import axios from "axios";
 
 const UploadPDFDialog = () => {
   const { user } = useUser();
@@ -98,6 +99,20 @@ const UploadPDFDialog = () => {
         createdBy: user?.primaryEmailAddress.emailAddress,
       });
 
+      // Process the PDF file data
+      const apiResponse = await axios.get("/api/load-pdf", {
+        params: {
+          pdfURL: fileURL, // Match backend param name
+        },
+        headers: {
+          "Content-Type": "application/json",
+        },
+        responseType: "json",
+        validateStatus: (status) => status >= 200 && status < 300,
+      });
+
+      // console.log("Processed PDF Data:", apiResponse.data.result);
+
       if (result.ok) {
         toast.success("File uploaded successfully!");
         resetState();
@@ -106,6 +121,7 @@ const UploadPDFDialog = () => {
       }
     } catch (error) {
       toast.error("An error occurred during the upload.");
+      console.log(error);
     } finally {
       setLoading(false);
       setIsDialogOpen(false);
