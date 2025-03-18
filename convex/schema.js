@@ -23,7 +23,7 @@ export default defineSchema({
     embedding: v.any(),
   }).vectorIndex("byEmbedding", {
     vectorField: "embedding",
-    dimensions: 1536,
-    // dimensions: 768,
+    // dimensions: 1536,
+    dimensions: 768,
   }),
 });

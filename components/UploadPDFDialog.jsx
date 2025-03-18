@@ -90,10 +90,11 @@ const UploadPDFDialog = () => {
       });
       const { storageId } = await result.json();
       const fileURL = await getURL({ storageId: storageId });
+      const fileId = uuidv4();
 
       // Step 3: Save the newly allocated storage id to the database
       await addPDF({
-        fileId: uuidv4(),
+        fileId: fileId,
         storageId: storageId,
         fileName: fileName,
         fileURL: fileURL,
@@ -114,13 +115,12 @@ const UploadPDFDialog = () => {
 
       console.log("Processed PDF Data:", apiResponse.data.result);
 
-      // const embeddedResult = await embedDocument({
-      //   docOutput: apiResponse.data.result,
-      //   fileId: "123",
-      // });
-      await embedDocument();
+      const embeddedResult = await embedDocument({
+        docOutput: apiResponse.data.result,
+        fileId: fileId,
+      });
 
-      // console.log("Embedded Document:", embeddedResult);
+      console.log("Embedded Document:", embeddedResult);
 
       if (result.ok) {
         toast.success("File uploaded successfully!");
@@ -140,7 +140,7 @@ const UploadPDFDialog = () => {
 
   return (
     <Dialog
-      open={isDialogOpen}
+      // open={isDialogOpen}
       onOpenChange={() => {
         setLoading(false);
         setFile(null);
@@ -210,7 +210,7 @@ const UploadPDFDialog = () => {
           <Button className="w-full" onClick={() => setIsDialogOpen(false)}>
             Close
           </Button>
-          <Button onClick={onUpload} className="w-full">
+          <Button onClick={onUpload} disabled={loading} className="w-full">
             {loading ? <Loader2 className="animate-spin" /> : "Upload"}
           </Button>
         </div>

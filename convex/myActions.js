@@ -11,18 +11,18 @@ const apiKey = `${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`;
 
 export const ingest = action({
   args: {
-    // docOutput: v.any(),
-    // fileId: v.string(),
+    docOutput: v.any(),
+    fileId: v.string(),
   },
-  handler: async (ctx) => {
+  handler: async (ctx, args) => {
     await ConvexVectorStore.fromTexts(
-      //   args.docOutput,
-      //   args.fileId,
-      ["This is a test", "This is another test", "This is a third test"],
-      "123",
+        args.docOutput,
+        args.fileId,
+      // ["This is a test", "This is another test", "This is a third test"],
+      // "123",
       new GoogleGenerativeAIEmbeddings({
-        apiKey: apiKey,
-        // apiKey: "AIzaSyDC_OAitLaxBdJMTwSIduCdEtBy7jSj-Y0",
+        // apiKey: apiKey,
+        apiKey: "AIzaSyDC_OAitLaxBdJMTwSIduCdEtBy7jSj-Y0",
         model: "text-embedding-004", // 768 dimensions
         taskType: TaskType.RETRIEVAL_DOCUMENT,
         title: "Document title",
