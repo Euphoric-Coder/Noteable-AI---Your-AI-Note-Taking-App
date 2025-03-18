@@ -7,7 +7,6 @@ import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 import { TaskType } from "@google/generative-ai";
 import { v } from "convex/values";
 
-const apiKey = `${process.env.NEXT_PUBLIC_GEMINI_API_KEY}`;
 
 export const ingest = action({
   args: {
@@ -15,15 +14,21 @@ export const ingest = action({
     fileId: v.string(),
   },
   handler: async (ctx, args) => {
+    // Retrieve the API key securely
+    const apiKey = process.env.GEMINI_API_KEY;
+
+    if (!apiKey) {
+      throw new Error("GEMINI_API_KEY is missing in Convex environment.");
+    }
+
+    console.log("Using API Key:", apiKey); // Debugging
+
     await ConvexVectorStore.fromTexts(
-        args.docOutput,
-        args.fileId,
-      // ["This is a test", "This is another test", "This is a third test"],
-      // "123",
+      args.docOutput || ["Default test text"],
+      args.fileId || "default_id",
       new GoogleGenerativeAIEmbeddings({
-        // apiKey: apiKey,
-        apiKey: "AIzaSyDC_OAitLaxBdJMTwSIduCdEtBy7jSj-Y0",
-        model: "text-embedding-004", // 768 dimensions
+        apiKey,
+        model: "text-embedding-004",
         taskType: TaskType.RETRIEVAL_DOCUMENT,
         title: "Document title",
       }),
@@ -31,3 +36,4 @@ export const ingest = action({
     );
   },
 });
+

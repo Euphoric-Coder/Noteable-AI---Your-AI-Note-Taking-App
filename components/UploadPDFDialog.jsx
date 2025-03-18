@@ -21,6 +21,7 @@ import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
+import { redirect } from "next/navigation";
 
 const UploadPDFDialog = () => {
   const { user } = useUser();
@@ -81,6 +82,9 @@ const UploadPDFDialog = () => {
     }
 
     setLoading(true);
+    toast.info("Uploading in progress...");
+    const fileId = uuidv4();
+
     try {
       const postUrl = await generateUploadUrl();
       const result = await fetch(postUrl, {
@@ -90,7 +94,6 @@ const UploadPDFDialog = () => {
       });
       const { storageId } = await result.json();
       const fileURL = await getURL({ storageId: storageId });
-      const fileId = uuidv4();
 
       // Step 3: Save the newly allocated storage id to the database
       await addPDF({
@@ -134,8 +137,8 @@ const UploadPDFDialog = () => {
     } finally {
       setLoading(false);
       setIsDialogOpen(false);
+      redirect(`/workspace/${fileId}`);
     }
-    console.log(file);
   };
 
   return (
@@ -206,14 +209,9 @@ const UploadPDFDialog = () => {
             />
           </div>
         )}
-        <div className="w-full flex items-center justify-between gap-4">
-          <Button className="w-full" onClick={() => setIsDialogOpen(false)}>
-            Close
-          </Button>
-          <Button onClick={onUpload} disabled={loading} className="w-full">
-            {loading ? <Loader2 className="animate-spin" /> : "Upload"}
-          </Button>
-        </div>
+        <Button onClick={onUpload} disabled={loading} className="w-full">
+          {loading ? <Loader2 className="animate-spin" /> : "Upload"}
+        </Button>
       </DialogContent>
     </Dialog>
   );
