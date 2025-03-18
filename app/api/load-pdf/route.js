@@ -3,7 +3,7 @@ import { WebPDFLoader } from "@langchain/community/document_loaders/web/pdf";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 
 // const pdfURL =
-//   "https://enduring-hornet-413.convex.cloud/api/storage/e3b005b4-e685-4ee5-92e4-bc87a58b7fa6";
+//   "https://enduring-hornet-413.convex.cloud/api/storage/538848f3-05a5-4961-aa11-e4805cbda87c";
 
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
@@ -18,16 +18,20 @@ export async function GET(req) {
 
   let pdfText = "";
   docs.forEach((doc) => {
-    pdfText += doc.pageContent;
+    pdfText += doc.pageContent + " ";
   });
+
+//   const text = `Hi.\n\nI'm Harrison.\n\nHow? Are? You?\nOkay then f f f f.
+// This is a weird text to write, but gotta test the splittingggg some how.\n\n
+// Bye!\n\n-H.This is just a test for hte following. and also it is not for fun. it. is. for. testing purposes.`;
 
   // Split Text in Small Chunks
   const textSplitter = new RecursiveCharacterTextSplitter({
-    chunkSize: 100,
-    chunkOverlap: 20,
+    chunkSize: 1000,
+    chunkOverlap: 200,
   });
 
-  const texts = await textSplitter.createDocuments(pdfText);
+  const texts = await textSplitter.createDocuments([pdfText]);
 
   let docOutput = [];
   texts.forEach((text) => {

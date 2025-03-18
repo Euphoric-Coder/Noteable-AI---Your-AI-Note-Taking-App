@@ -16,7 +16,7 @@ import { Input } from "./ui/input";
 import { FiUploadCloud } from "react-icons/fi";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import { useMutation } from "convex/react";
+import { useAction, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
 import { v4 as uuidv4 } from "uuid";
@@ -27,6 +27,7 @@ const UploadPDFDialog = () => {
   const generateUploadUrl = useMutation(api.uploadFile.generateUploadUrl);
   const addPDF = useMutation(api.uploadFile.addFile);
   const getURL = useMutation(api.storeFile.getFileURL);
+  const embedDocument = useAction(api.myActions.ingest);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [fileName, setFileName] = useState("");
   const [file, setFile] = useState(null);
@@ -111,7 +112,15 @@ const UploadPDFDialog = () => {
         validateStatus: (status) => status >= 200 && status < 300,
       });
 
-      // console.log("Processed PDF Data:", apiResponse.data.result);
+      console.log("Processed PDF Data:", apiResponse.data.result);
+
+      // const embeddedResult = await embedDocument({
+      //   docOutput: apiResponse.data.result,
+      //   fileId: "123",
+      // });
+      await embedDocument();
+
+      // console.log("Embedded Document:", embeddedResult);
 
       if (result.ok) {
         toast.success("File uploaded successfully!");
