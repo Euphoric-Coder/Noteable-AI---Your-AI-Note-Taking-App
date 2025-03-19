@@ -34,6 +34,7 @@ const UploadPDFDialog = () => {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [success, setSuccess] = useState(false);
   const fileInputRef = useRef(null);
 
   const resetState = () => {
