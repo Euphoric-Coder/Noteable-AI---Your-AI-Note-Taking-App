@@ -10,17 +10,26 @@ import React, { useState } from "react";
 const page = () => {
   const searchQuery = useAction(api.myActions.search);
   const [query, setQuery] = useState("");
+  const [result, setResult] = useState([]);
   const fileId = useParams();
 
   const searchAi = async () => {
-    console.log(query);
-    console.log(fileId.id);
-    await searchQuery({ query: query, fileId: fileId.id });
+    setResult(JSON.parse(await searchQuery({ query: query, fileId: fileId.id })));
   };
   return (
     <div>
       <Input value={query} onChange={(e) => setQuery(e.target.value)} />
       <Button onClick={() => searchAi()}>Search</Button>
+      <div className="mt-4 text-4xl font-extrabold">
+        Result from Query: {query ? `"${query}"` : "No Query"}
+      </div>
+      <div>
+        {result.length > 0 ? (
+          <div>{result[0].pageContent}</div>
+        ) : (
+          <div>No Results</div>
+        )}
+      </div>
     </div>
   );
 };
