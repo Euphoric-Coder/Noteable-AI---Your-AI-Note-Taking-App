@@ -3,18 +3,29 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { api } from "@/convex/_generated/api";
-import { useAction } from "convex/react";
+import { useAction, useMutation } from "convex/react";
+import Link from "next/link";
 import { useParams } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const page = () => {
   const searchQuery = useAction(api.myActions.search);
+  const fetchFileData = useMutation(api.myQueries.fetchUserFiles);
   const [query, setQuery] = useState("");
   const [result, setResult] = useState([]);
+  const [fileData, setFileData] = useState([]);
   const fileId = useParams();
 
+  useEffect(() => {
+    fetchFileData({ fileId: fileId.id }).then((data) => {
+      setFileData(data[0]);
+    });
+  }, [fileData]);
+
   const searchAi = async () => {
-    setResult(JSON.parse(await searchQuery({ query: query, fileId: fileId.id })));
+    setResult(
+      JSON.parse(await searchQuery({ query: query, fileId: fileId.id }))
+    );
   };
   return (
     <div>
@@ -29,6 +40,11 @@ const page = () => {
         ) : (
           <div>No Results</div>
         )}
+      </div>
+      <div>
+        {fileData.fileName}
+        <br />
+        <Link href={`${fileData.fileURL}`} target="_blank">{fileData.fileURL}</Link>
       </div>
     </div>
   );

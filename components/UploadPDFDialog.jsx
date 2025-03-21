@@ -108,13 +108,8 @@ const UploadPDFDialog = () => {
       // Process the PDF file data
       const apiResponse = await axios.get("/api/load-pdf", {
         params: {
-          pdfURL: fileURL, // Match backend param name
-        },
-        headers: {
-          "Content-Type": "application/json",
-        },
-        responseType: "json",
-        validateStatus: (status) => status >= 200 && status < 300,
+          pdfURL: fileURL, 
+        }
       });
 
       console.log("Processed PDF Data:", apiResponse.data.result);

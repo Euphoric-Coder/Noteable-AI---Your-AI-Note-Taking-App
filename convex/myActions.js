@@ -3,8 +3,7 @@ import { action, internalQuery } from "./_generated/server.js";
 import { api, internal } from "./_generated/api.js";
 import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 import { TaskType } from "@google/generative-ai";
-import { v } from "convex/values";
-import { countDocuments } from "./appQueries.js";
+import { jsonToConvex, v } from "convex/values";
 
 // Define an internal query that performs the actual database access
 export const pdfCount = internalQuery({
@@ -72,16 +71,13 @@ export const search = action({
     console.log("Total Documents in Schema:", totalDocuments);
 
     const resultOne = (
-      await vectorStore.similaritySearch(args.query, totalDocuments)
+      await vectorStore.similaritySearch(args.query, 1)
     ).filter((doc) => {
-      let result = "";
-      for (const key in doc.metadata) {
-        // Ensure accessing fileId
-        result += doc.metadata[key]; // Concatenate characters into string
-      }
-      return result == args.fileId; // ✅ Return the boolean result
+      console.log("Document Metadata:", doc.metadata.fileId);
+      console.log(doc.metadata.fileId === args.fileId);
+      return doc.metadata.fileId === args.fileId; // ✅ Return the boolean result
     });
 
-    return resultOne;
+    return JSON.stringify(resultOne);
   },
 });
