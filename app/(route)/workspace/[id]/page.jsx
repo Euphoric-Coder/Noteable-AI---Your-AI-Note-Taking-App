@@ -3,9 +3,11 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { api } from "@/convex/_generated/api";
+import { aiAssist } from "@/lib/aiAssist";
 import { useAction, useMutation } from "convex/react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import parse from "html-react-parser";
 import React, { useEffect, useState } from "react";
 
 const page = () => {
@@ -20,12 +22,16 @@ const page = () => {
     fetchFileData({ fileId: fileId.id }).then((data) => {
       setFileData(data[0]);
     });
-  }, [fileData]);
+  }, []);
 
   const searchAi = async () => {
-    setResult(
-      JSON.parse(await searchQuery({ query: query, fileId: fileId.id }))
+    const queryResult = JSON.parse(
+      await searchQuery({ query: query, fileId: fileId.id })
     );
+
+    const response = await aiAssist(query, queryResult[0].pageContent);
+
+    setResult(response);
   };
   return (
     <div>
@@ -35,16 +41,14 @@ const page = () => {
         Result from Query: {query ? `"${query}"` : "No Query"}
       </div>
       <div>
-        {result.length > 0 ? (
-          <div>{result[0].pageContent}</div>
-        ) : (
-          <div>No Results</div>
-        )}
+        {result.length > 0 ? <div>{parse(result)}</div> : <div>No Results</div>}
       </div>
       <div>
         {fileData.fileName}
         <br />
-        <Link href={`${fileData.fileURL}`} target="_blank">{fileData.fileURL}</Link>
+        <Link href={`${fileData.fileURL}`} target="_blank">
+          {fileData.fileURL}
+        </Link>
       </div>
     </div>
   );
