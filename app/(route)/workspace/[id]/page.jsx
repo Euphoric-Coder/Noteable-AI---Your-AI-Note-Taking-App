@@ -6,9 +6,11 @@ import { api } from "@/convex/_generated/api";
 import { aiAssist } from "@/lib/aiAssist";
 import { useAction, useMutation } from "convex/react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { redirect, useParams } from "next/navigation";
 import parse from "html-react-parser";
 import React, { useEffect, useState } from "react";
+import PDFViewer from "@/components/Workspace/PDFViewer";
+import Editor from "@/components/Workspace/Editor";
 
 const page = () => {
   const searchQuery = useAction(api.myActions.search);
@@ -20,9 +22,13 @@ const page = () => {
 
   useEffect(() => {
     fetchFileData({ fileId: fileId.id }).then((data) => {
-      setFileData(data[0]);
+      if (!data || data.length === 0) {
+        redirect("/dashboard");
+      } else {
+        setFileData(data[0]);
+      }
     });
-  }, []);
+  }, [fetchFileData]);
 
   const searchAi = async () => {
     const queryResult = JSON.parse(
@@ -34,21 +40,16 @@ const page = () => {
     setResult(response);
   };
   return (
-    <div>
-      <Input value={query} onChange={(e) => setQuery(e.target.value)} />
-      <Button onClick={() => searchAi()}>Search</Button>
-      <div className="mt-4 text-4xl font-extrabold">
-        Result from Query: {query ? `"${query}"` : "No Query"}
-      </div>
+    <div className="grid grid-cols-2 gap-5">
       <div>
-        {result.length > 0 ? <div>{parse(result)}</div> : <div>No Results</div>}
+        <Editor />
       </div>
-      <div>
-        {fileData.fileName}
-        <br />
-        <Link href={`${fileData.fileURL}`} target="_blank">
-          {fileData.fileURL}
-        </Link>
+      <div className="w-full">
+        {fileData?.fileURL ? (
+          <PDFViewer fileURL={fileData.fileURL} />
+        ) : (
+          <div className="flex justify-center items-center">Loading PDF...</div>
+        )}
       </div>
     </div>
   );
