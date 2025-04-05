@@ -11,6 +11,7 @@ import parse from "html-react-parser";
 import React, { useEffect, useState } from "react";
 import PDFViewer from "@/components/Workspace/PDFViewer";
 import Editor from "@/components/Workspace/Editor";
+import Header from "@/components/Header";
 
 const page = () => {
   const searchQuery = useAction(api.myActions.search);
@@ -40,16 +41,21 @@ const page = () => {
     setResult(response);
   };
   return (
-    <div className="grid grid-cols-2 gap-5">
-      <div>
-        <Editor />
-      </div>
-      <div className="w-full">
-        {fileData?.fileURL ? (
-          <PDFViewer fileURL={fileData.fileURL} />
-        ) : (
-          <div className="flex justify-center items-center">Loading PDF...</div>
-        )}
+    <div>
+      <Header />
+      <div className="grid grid-cols-2 gap-5">
+        <div>
+          <Editor />
+        </div>
+        <div className="w-full">
+          {fileData?.fileURL ? (
+            <PDFViewer fileURL={fileData.fileURL} />
+          ) : (
+            <div className="flex justify-center items-center">
+              Loading PDF...
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

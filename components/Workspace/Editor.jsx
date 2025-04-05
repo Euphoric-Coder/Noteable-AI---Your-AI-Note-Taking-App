@@ -62,28 +62,29 @@ const MenuBar = ({ editor }) => {
     }
   };
 
-  const searchAi = async () => {
+  const searchAi = async ({ text }) => {
+    toast.info("AI is thinking.. please wait");
+
     const queryResult = JSON.parse(
-      await vectorSearchQuery({ query: selectedText, fileId: fileId.id })
+      await vectorSearchQuery({ query: text, fileId: fileId.id })
     );
 
-    const response = await aiAssist(selectedText, queryResult[0].pageContent);
+    const response = await aiAssist(text, queryResult[0].pageContent);
 
     console.log(response.replace("```", ""));
     console.log(`
-        <p><strong>${selectedText}</strong></p>
-        <p>${response.replace("```", "")}</p>
+        <p><strong>${text}</strong></p>
+        ${response.replace("```", "")}
         `);
 
-    if (response.replace("```", "") === "") {
+    if (response.replace("```", "") === "" || response.replace("```", "") === `""`) {
       toast.error(
         "No response from AI can be generated! Please ask a different question."
       );
       return;
     } else {
-      editor.commands.insertContent(
-        `<p><strong>${selectedText}</strong></p><p>${response.replace("```", "")}</p>`
-      );
+      editor.commands.insertContent(`<strong>${text}</strong>`);
+      editor.commands.insertContent(`${response.replace("```", "")}`);
     }
   };
 
@@ -95,8 +96,8 @@ const MenuBar = ({ editor }) => {
     }`;
 
   return (
-    <div className="sticky top-0 z-50 flex flex-wrap justify-between rounded-tr-2xl rounded-tl-2xl gap-2 border-r border-l border-2 border-gray-300 p-4 backdrop-blur-md bg-white/60 dark:bg-slate-900/60">
-      <div>
+    <div className="sticky top-0 z-50 flex flex-wrap items-center justify-between rounded-tr-2xl rounded-tl-2xl gap-2 border-r border-l border-2 border-gray-300 p-4 backdrop-blur-md bg-white/60 dark:bg-slate-900/60">
+      <div className="flex items-center">
         {[1, 2, 3].map((level) => (
           <TooltipProvider key={level}>
             <Tooltip>
@@ -224,7 +225,7 @@ const MenuBar = ({ editor }) => {
                   const { from, to } = view.state.selection;
                   const text = state.doc.textBetween(from, to, "");
                   setSelectedText(text);
-                  searchAi();
+                  searchAi({ text });
                 }}
                 className={buttonStyle()}
               >
@@ -322,7 +323,7 @@ export default function Editor() {
         <MenuBar editor={editor} />
         <EditorContent
           editor={editor}
-          className="overflow-y-auto max-h-[1000px]"
+          className="overflow-y-auto max-h-[88vh]"
         />
       </div>
     </div>
