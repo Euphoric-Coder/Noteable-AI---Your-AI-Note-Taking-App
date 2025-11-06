@@ -1,5 +1,6 @@
 "use client";
 
+import Landing from "@/components/Landing/LandingPage";
 import { api } from "@/convex/_generated/api";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { useMutation } from "convex/react";
@@ -15,16 +16,15 @@ const page = () => {
 
   const CheckUser = async () => {
     const response = await createUser({
-        userName: user?.fullName,
-        email: user?.primaryEmailAddress?.emailAddress,
-        imageURL: user?.imageUrl,
+      userName: user?.fullName,
+      email: user?.primaryEmailAddress?.emailAddress,
+      imageURL: user?.imageUrl,
     });
   };
 
   return (
-    <div className="text-3xl font-extrabold text-blue-500">
-      This is just a test page
-      <UserButton />
+    <div>
+      <Landing />
     </div>
   );
 };

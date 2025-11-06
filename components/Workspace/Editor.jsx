@@ -309,7 +309,7 @@ export default function Editor() {
     editorProps: {
       attributes: {
         class:
-          "prose dark:prose-invert max-w-none p-4 min-h-[750px] rounded-3xl border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 outline-none",
+          "prose dark:prose-invert max-w-none p-4 min-h-screen rounded-3xl border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 outline-none",
       },
     },
     onUpdate: ({ editor }) => {
@@ -318,12 +318,12 @@ export default function Editor() {
   });
 
   return (
-    <div className="p-8">
+    <div className="">
       <div>
         <MenuBar editor={editor} />
         <EditorContent
           editor={editor}
-          className="overflow-y-auto max-h-[88vh]"
+          className="overflow-y-auto"
         />
       </div>
     </div>
