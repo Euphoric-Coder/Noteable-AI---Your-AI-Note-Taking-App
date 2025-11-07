@@ -1,15 +1,14 @@
-import Header from "@/components/Header";
-import Sidebar from "@/components/Sidebar";
+import Sidebar from "@/components/Dashboard/Sidebar";
 import React from "react";
 
 const DashboardLayout = ({ children }) => {
   return (
     <div>
-      <div className="fixed hidden xl:block xl:w-80 h-screen">
+      <div className="fixed hidden xl:block xl:w-64 h-screen">
         <Sidebar />
       </div>
-      <div className="xl:ml-80">
-        <Header />
+      <div className="xl:ml-64">
+        {/* <Header /> */}
         <div>{children}</div>
       </div>
     </div>
