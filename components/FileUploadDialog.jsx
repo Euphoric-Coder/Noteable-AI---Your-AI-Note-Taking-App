@@ -184,6 +184,85 @@ export default function FileUploadDialog({ children, onFilesUploaded }) {
               {uploadStage === "uploading" && "Uploading Files"}
             </span>
           </DialogTitle>
+
+          {/* Step Indicators */}
+          <div className="flex items-center justify-center space-x-4 py-4">
+            <div className="flex items-center space-x-2">
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
+                  uploadStage === "select"
+                    ? "bg-red-500 text-white"
+                    : "bg-red-100 text-red-600"
+                }`}
+              >
+                1
+              </div>
+              <span
+                className={`text-sm font-medium ${
+                  uploadStage === "select" ? "text-red-600" : "text-gray-500"
+                }`}
+              >
+                Select
+              </span>
+            </div>
+
+            <div
+              className={`w-8 h-0.5 ${
+                uploadStage !== "select" ? "bg-red-200" : "bg-gray-200"
+              }`}
+            />
+
+            <div className="flex items-center space-x-2">
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
+                  uploadStage === "confirm"
+                    ? "bg-red-500 text-white"
+                    : uploadStage === "uploading"
+                      ? "bg-red-100 text-red-600"
+                      : "bg-gray-100 text-gray-400"
+                }`}
+              >
+                2
+              </div>
+              <span
+                className={`text-sm font-medium ${
+                  uploadStage === "confirm"
+                    ? "text-red-600"
+                    : uploadStage === "uploading"
+                      ? "text-gray-600"
+                      : "text-gray-400"
+                }`}
+              >
+                Review
+              </span>
+            </div>
+
+            <div
+              className={`w-8 h-0.5 ${
+                uploadStage === "uploading" ? "bg-red-200" : "bg-gray-200"
+              }`}
+            />
+
+            <div className="flex items-center space-x-2">
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
+                  uploadStage === "uploading"
+                    ? "bg-red-500 text-white"
+                    : "bg-gray-100 text-gray-400"
+                }`}
+              >
+                3
+              </div>
+              <span
+                className={`text-sm font-medium ${
+                  uploadStage === "uploading" ? "text-red-600" : "text-gray-400"
+                }`}
+              >
+                Upload
+              </span>
+            </div>
+          </div>
+
           <DialogDescription>
             {uploadStage === "select" &&
               "Choose PDF documents to upload and analyze with AI-powered search."}

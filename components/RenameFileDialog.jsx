@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,33 +21,31 @@ export default function RenameFileDialog({
   const [newName, setNewName] = useState(fileName);
   const [isRenaming, setIsRenaming] = useState(false);
 
+  // ✅ Keeps dialog input always in sync with latest filename
+  useEffect(() => {
+    if (open) setNewName(fileName);
+  }, [open, fileName]);
+
   const handleRename = async () => {
-    if (!newName.trim() || newName === fileName) return;
+    const trimmedName = newName.trim();
+    if (!trimmedName || trimmedName === fileName) return;
 
     setIsRenaming(true);
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 800));
-
-    onRename(newName.trim());
+    onRename(trimmedName);
     setIsRenaming(false);
     onOpenChange(false);
   };
 
-  const handleOpenChange = (open) => {
-    if (!isRenaming) {
-      onOpenChange(open);
-      if (!open) {
-        setNewName(fileName); // Reset to original name if cancelled
-      }
-    }
-  };
-
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[400px]">
+    <Dialog open={open} onOpenChange={(o) => !isRenaming && onOpenChange(o)}>
+      <DialogContent
+        className="sm:max-w-[400px]"
+        onClick={(e) => e.stopPropagation()}
+      >
         <DialogHeader>
-          <DialogTitle className="flex items-center space-x-2">
+          <DialogTitle className="flex items-center gap-2">
             <div className="p-2 bg-gradient-to-r from-red-100 to-red-200 rounded-lg">
               <FileText className="h-4 w-4 text-red-600" />
             </div>
@@ -59,29 +57,25 @@ export default function RenameFileDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="file-name">File Name</Label>
-            <Input
-              id="file-name"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              placeholder="Enter new file name..."
-              className="focus:ring-red-400 focus:border-red-400"
-              disabled={isRenaming}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !isRenaming) {
-                  handleRename();
-                }
-              }}
-            />
-          </div>
+        <div className="py-4 space-y-2">
+          <Label htmlFor="file-name">File Name</Label>
+          <Input
+            id="file-name"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            placeholder="Enter new file name..."
+            className="focus:ring-red-400 focus:border-red-400"
+            disabled={isRenaming}
+            onKeyDown={(e) =>
+              e.key === "Enter" && !isRenaming && handleRename()
+            }
+          />
         </div>
 
         <DialogFooter>
           <Button
             variant="outline"
-            onClick={() => handleOpenChange(false)}
+            onClick={() => onOpenChange(false)}
             disabled={isRenaming}
           >
             Cancel

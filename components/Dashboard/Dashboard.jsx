@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { toast } from "sonner";
 import {
   MoveHorizontal as MoreHorizontal,
   CreditCard as Edit3,
@@ -24,6 +23,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import FileUploadDialog from "@/components/FileUploadDialog";
 import RenameFileDialog from "@/components/RenameFileDialog";
+import { format } from "date-fns";
+import { toast } from "sonner";
 
 export default function Dashboard() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -66,20 +67,14 @@ export default function Dashboard() {
         file.id === renameDialog.fileId ? { ...file, name: newName } : file
       )
     );
-    toast({
-      title: "File renamed",
-      description: `File has been renamed to "${newName}"`,
-    });
+    toast.success(`File has been renamed to "${newName}"`);
   };
 
   const handleDelete = (fileId) => {
     const file = files.find((f) => f.id === fileId);
     if (file) {
       setFiles((prev) => prev.filter((f) => f.id !== fileId));
-      toast({
-        title: "File deleted",
-        description: `"${file.name}" has been deleted successfully.`,
-      });
+      toast.success(`"${file.name}" has been deleted successfully.`);
     }
   };
 
@@ -93,10 +88,7 @@ export default function Dashboard() {
     }));
 
     setFiles((prev) => [...prev, ...newFiles]);
-    toast({
-      title: "Files uploaded",
-      description: `${uploadedFiles.length} file(s) uploaded successfully.`,
-    });
+    toast.success(`${uploadedFiles.length} file(s) uploaded successfully.`);
   };
 
   const getStatusColor = (status) => {
@@ -260,7 +252,10 @@ export default function Dashboard() {
                           <div className="flex items-center space-x-4 text-sm text-gray-500">
                             <span className="flex items-center">
                               <Calendar className="h-4 w-4 mr-1.5" />
-                              {new Date(file.uploadDate).toLocaleDateString()}
+                              {format(
+                                new Date(file.uploadDate),
+                                "MMM dd, yyyy"
+                              )}
                             </span>
                             <span className="font-medium">{file.size}</span>
                             <Badge
@@ -283,7 +278,7 @@ export default function Dashboard() {
                           <Edit3 className="h-4 w-4" />
                         </Button>
 
-                        <DropdownMenu>
+                        <DropdownMenu modal={false}>
                           <DropdownMenuTrigger asChild>
                             <Button
                               variant="outline"
