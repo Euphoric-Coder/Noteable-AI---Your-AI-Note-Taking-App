@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { toast } from "sonner";
 import {
-  EllipsisVertical as InfoHorizontal,
+  MoveHorizontal as MoreHorizontal,
   CreditCard as Edit3,
   Trash2,
   FileText,
@@ -21,14 +22,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { format } from "date-fns";
+import FileUploadDialog from "@/components/FileUploadDialog";
+import RenameFileDialog from "@/components/RenameFileDialog";
 
 export default function Dashboard() {
-  const [files] = useState([
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [files, setFiles] = useState([
     {
       id: "1",
       name: "Product Requirements Document.pdf",
-      uploadDate: "2025-02-12",
+      uploadDate: "2025-01-12",
       size: "2.4 MB",
       status: "processed",
     },
@@ -40,13 +43,60 @@ export default function Dashboard() {
       status: "processed",
     },
   ]);
+  const [renameDialog, setRenameDialog] = useState({
+    open: false,
+    fileId: "",
+    fileName: "",
+  });
 
   const handleEdit = (fileId) => {
-    console.log("Edit file:", fileId);
+    const file = files.find((f) => f.id === fileId);
+    if (file) {
+      setRenameDialog({
+        open: true,
+        fileId: fileId,
+        fileName: file.name,
+      });
+    }
+  };
+
+  const handleRename = (newName) => {
+    setFiles((prev) =>
+      prev.map((file) =>
+        file.id === renameDialog.fileId ? { ...file, name: newName } : file
+      )
+    );
+    toast({
+      title: "File renamed",
+      description: `File has been renamed to "${newName}"`,
+    });
   };
 
   const handleDelete = (fileId) => {
-    console.log("Delete file:", fileId);
+    const file = files.find((f) => f.id === fileId);
+    if (file) {
+      setFiles((prev) => prev.filter((f) => f.id !== fileId));
+      toast({
+        title: "File deleted",
+        description: `"${file.name}" has been deleted successfully.`,
+      });
+    }
+  };
+
+  const handleFilesUploaded = (uploadedFiles) => {
+    const newFiles = uploadedFiles.map((file) => ({
+      id: file.id,
+      name: file.name,
+      uploadDate: new Date().toISOString().split("T")[0],
+      size: file.size,
+      status: "processed",
+    }));
+
+    setFiles((prev) => [...prev, ...newFiles]);
+    toast({
+      title: "Files uploaded",
+      description: `${uploadedFiles.length} file(s) uploaded successfully.`,
+    });
   };
 
   const getStatusColor = (status) => {
@@ -64,9 +114,9 @@ export default function Dashboard() {
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-gray-50 via-white to-red-50/20">
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden lg:ml-0 ml-0">
         {/* Header */}
-        <div className="bg-white/80 backdrop-blur-sm border-b border-gray-100 px-6 py-6 shadow-sm">
+        <div className="bg-white/80 backdrop-blur-sm border-b border-gray-100 px-6 py-6 shadow-sm lg:pl-6 pl-16">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
@@ -76,15 +126,17 @@ export default function Dashboard() {
                 Manage your uploaded files and workspaces
               </p>
             </div>
-            <Button className="bg-gradient-to-r from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 text-white shadow-lg hover:shadow-xl hover:shadow-red-200/50 transition-all duration-300 transform hover:-translate-y-1">
-              <Upload className="h-4 w-4 mr-2" />
-              Upload PDF
-            </Button>
+            <FileUploadDialog onFilesUploaded={handleFilesUploaded}>
+              <Button className="bg-gradient-to-r from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 text-white shadow-lg hover:shadow-xl hover:shadow-red-200/50 transition-all duration-300 transform hover:-translate-y-1">
+                <Upload className="h-4 w-4 mr-2" />
+                Upload PDF
+              </Button>
+            </FileUploadDialog>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 overflow-auto p-6 space-y-8">
+        <div className="flex-1 overflow-auto p-6 space-y-8 lg:pl-6 pl-6">
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl hover:shadow-red-100/30 transition-all duration-300 hover:-translate-y-1">
@@ -183,10 +235,12 @@ export default function Dashboard() {
                     Upload your first PDF to get started with AI-powered
                     document analysis
                   </p>
-                  <Button className="bg-gradient-to-r from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 text-white shadow-lg hover:shadow-xl hover:shadow-red-200/50 transition-all duration-300 transform hover:-translate-y-1">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Upload Your First PDF
-                  </Button>
+                  <FileUploadDialog onFilesUploaded={handleFilesUploaded}>
+                    <Button className="bg-gradient-to-r from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 text-white shadow-lg hover:shadow-xl hover:shadow-red-200/50 transition-all duration-300 transform hover:-translate-y-1">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Upload Your First PDF
+                    </Button>
+                  </FileUploadDialog>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -206,7 +260,7 @@ export default function Dashboard() {
                           <div className="flex items-center space-x-4 text-sm text-gray-500">
                             <span className="flex items-center">
                               <Calendar className="h-4 w-4 mr-1.5" />
-                              {format(file.uploadDate, "PPP")}
+                              {new Date(file.uploadDate).toLocaleDateString()}
                             </span>
                             <span className="font-medium">{file.size}</span>
                             <Badge
@@ -236,7 +290,7 @@ export default function Dashboard() {
                               size="sm"
                               className="border-gray-200 hover:border-gray-300"
                             >
-                              <InfoHorizontal className="h-4 w-4" />
+                              <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
@@ -262,6 +316,16 @@ export default function Dashboard() {
               )}
             </CardContent>
           </Card>
+
+          {/* Rename Dialog */}
+          <RenameFileDialog
+            open={renameDialog.open}
+            onOpenChange={(open) =>
+              setRenameDialog((prev) => ({ ...prev, open }))
+            }
+            fileName={renameDialog.fileName}
+            onRename={handleRename}
+          />
         </div>
       </div>
     </div>
