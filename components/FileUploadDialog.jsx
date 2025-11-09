@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import {
   Dialog,
   DialogContent,
@@ -22,7 +20,7 @@ import {
   CircleCheck as CheckCircle,
   CircleAlert as AlertCircle,
   Plus,
-  CreditCard as Edit3,
+  ChevronRight,
 } from "lucide-react";
 
 export default function FileUploadDialog({ children, onFilesUploaded }) {
@@ -30,7 +28,7 @@ export default function FileUploadDialog({ children, onFilesUploaded }) {
   const [pendingFiles, setPendingFiles] = useState([]);
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadStage, setUploadStage] = useState("select");
+  const [uploadStage, setUploadStage] = useState("select"); // Simulated existing files count
 
   const handleFileSelection = (event) => {
     const files = event.target.files;
@@ -100,11 +98,13 @@ export default function FileUploadDialog({ children, onFilesUploaded }) {
   };
 
   const removePendingFile = (fileId) => {
-    setPendingFiles((prev) => prev.filter((file) => file.id !== fileId));
-  };
-
-  const removeUploadedFile = (fileId) => {
-    setUploadedFiles((prev) => prev.filter((file) => file.id !== fileId));
+    setPendingFiles((prev) => {
+      const updated = prev.filter((file) => file.id !== fileId);
+      if (updated.length === 0 && uploadStage === "confirm") {
+        setUploadStage("select");
+      }
+      return updated;
+    });
   };
 
   const updatePendingFileName = (fileId, newName) => {
@@ -114,6 +114,9 @@ export default function FileUploadDialog({ children, onFilesUploaded }) {
       )
     );
   };
+
+  // Add missing import for ChevronRight
+  // (This should be added to the imports at the top of the file)
 
   const getStatusIcon = (status) => {
     switch (status) {
@@ -274,194 +277,195 @@ export default function FileUploadDialog({ children, onFilesUploaded }) {
         </DialogHeader>
 
         <div className="space-y-6 py-4">
-          {/* File Selection Stage */}
           {uploadStage === "select" && (
-            <Card className="border-2 border-dashed border-gray-200 hover:border-red-300 transition-colors">
-              <CardContent className="p-8">
-                <div className="text-center">
-                  <div className="p-4 bg-gradient-to-r from-red-100 to-red-200 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
-                    <Upload className="h-10 w-10 text-red-600" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                    Select PDF Files
-                  </h3>
-                  <p className="text-gray-600 mb-6 leading-relaxed">
-                    Choose your PDF files to upload. You'll be able to review
-                    and rename them before uploading.
-                  </p>
-                  <input
-                    type="file"
-                    multiple
-                    accept=".pdf"
-                    onChange={handleFileSelection}
-                    className="hidden"
-                    id="pdf-upload"
-                  />
-                  <Button
-                    variant="outline"
-                    onClick={() =>
-                      document.getElementById("pdf-upload")?.click()
-                    }
-                    className="border-red-200 text-red-600 hover:bg-red-50 shadow-md hover:shadow-lg transition-all duration-300"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Choose PDF Files
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* File Confirmation Stage */}
-          {uploadStage === "confirm" && pendingFiles.length > 0 && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label className="text-lg font-semibold">Review Files</Label>
-                <Badge variant="secondary" className="text-sm px-3 py-1">
-                  {pendingFiles.length} files selected
-                </Badge>
-              </div>
-
-              <div className="space-y-3 max-h-60 overflow-y-auto">
-                {pendingFiles.map((file) => (
-                  <div
-                    key={file.id}
-                    className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-100 shadow-sm"
-                  >
-                    <div className="flex items-center space-x-4 flex-1 min-w-0">
-                      <div className="p-3 bg-gradient-to-r from-red-100 to-red-200 rounded-xl">
-                        <FileText className="h-5 w-5 text-red-600" />
-                      </div>
-                      <div className="flex-1 min-w-0 space-y-2">
-                        <Input
-                          value={file.name}
-                          onChange={(e) =>
-                            updatePendingFileName(file.id, e.target.value)
-                          }
-                          className="font-semibold text-sm focus:ring-red-400 focus:border-red-400"
-                          placeholder="Enter file name..."
-                        />
-                        <div className="flex items-center space-x-3">
-                          <span className="text-xs text-gray-500">
-                            {file.size}
-                          </span>
-                          <Badge variant="outline" className="text-xs">
-                            Ready to upload
-                          </Badge>
+            <div className="space-y-6">
+              {pendingFiles.length > 0 && (
+                <Card className="bg-green-50 border-green-200">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="p-2 bg-green-100 rounded-lg">
+                          <FileText className="h-5 w-5 text-green-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-green-900">
+                            {pendingFiles.length} files ready for review
+                          </p>
+                          <p className="text-sm text-green-700">
+                            {pendingFiles.length <= 3
+                              ? pendingFiles.map((f) => f.name).join(", ")
+                              : `${pendingFiles
+                                  .slice(0, 3)
+                                  .map((f) => f.name)
+                                  .join(
+                                    ", "
+                                  )} and ${pendingFiles.length - 3} more`}
+                          </p>
                         </div>
                       </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setUploadStage("confirm")}
+                        className="border-green-200 text-green-600 hover:bg-green-50"
+                      >
+                        Review Files
+                        <ChevronRight className="h-4 w-4 ml-1" />
+                      </Button>
                     </div>
+                  </CardContent>
+                </Card>
+              )}
 
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removePendingFile(file.id)}
-                      className="text-gray-400 hover:text-red-500 p-1 ml-2"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-
-              <Separator />
-
-              <div className="flex items-center justify-between">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setUploadStage("select");
-                    document.getElementById("pdf-upload")?.click();
-                  }}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add More Files
-                </Button>
-
-                <Button
-                  onClick={handleStartUpload}
-                  disabled={!canProceed}
-                  className="bg-gradient-to-r from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 text-white"
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  Upload {pendingFiles.length} Files
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Upload Progress Stage */}
-          {uploadStage === "uploading" && uploadedFiles.length > 0 && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label className="text-lg font-semibold">Upload Progress</Label>
-                <Badge variant="secondary" className="text-sm px-3 py-1">
-                  {uploadedFiles.length} files
-                </Badge>
-              </div>
-
-              <div className="space-y-3 max-h-60 overflow-y-auto">
-                {uploadedFiles.map((file) => (
-                  <div
-                    key={file.id}
-                    className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-100 shadow-sm"
-                  >
-                    <div className="flex items-center space-x-4 flex-1 min-w-0">
-                      <div className="p-3 bg-gradient-to-r from-red-100 to-red-200 rounded-xl">
-                        <FileText className="h-5 w-5 text-red-600" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-gray-900 truncate text-sm">
-                          {file.name}
-                        </p>
-                        <div className="flex items-center space-x-3 mt-1">
-                          <span className="text-xs text-gray-500">
-                            {file.size}
-                          </span>
-                          <Badge
-                            variant="secondary"
-                            className={`${getStatusColor(file.status)} text-xs px-2 py-1`}
-                          >
-                            {file.status}
-                          </Badge>
-                        </div>
-                        {(file.status === "uploading" ||
-                          file.status === "processing") && (
-                          <div className="mt-2">
-                            <Progress value={file.progress} className="h-1.5" />
-                            <span className="text-xs text-gray-500 mt-1">
-                              {file.progress}%
-                            </span>
-                          </div>
-                        )}
-                      </div>
+              <Card className="border-2 border-dashed border-gray-200 hover:border-red-300 transition-colors">
+                <CardContent className="p-8">
+                  <div className="text-center">
+                    <div className="p-4 bg-gradient-to-r from-red-100 to-red-200 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                      <Upload className="h-10 w-10 text-red-600" />
                     </div>
-
-                    <div className="flex items-center space-x-2">
-                      {getStatusIcon(file.status)}
-                      {file.status === "processed" && (
+                    <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                      {pendingFiles.length > 0
+                        ? "Add More PDF Files"
+                        : "Upload PDF Files"}
+                    </h3>
+                    <p className="text-gray-600 mb-6 leading-relaxed">
+                      {pendingFiles.length > 0
+                        ? "Select additional PDF files to add to your upload queue"
+                        : "Drag and drop your PDF files here, or click to browse"}
+                    </p>
+                    <input
+                      type="file"
+                      multiple
+                      accept=".pdf"
+                      onChange={handleFileSelection}
+                      className="hidden"
+                      id="file-upload"
+                    />
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                      <Button
+                        variant="outline"
+                        onClick={() =>
+                          document.getElementById("file-upload")?.click()
+                        }
+                        className="border-red-200 text-red-600 hover:bg-red-50"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        {pendingFiles.length > 0
+                          ? "Add More Files"
+                          : "Choose Files"}
+                      </Button>
+                      {pendingFiles.length > 0 && (
                         <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeUploadedFile(file.id)}
-                          className="text-gray-400 hover:text-red-500 p-1"
+                          onClick={() => setUploadStage("confirm")}
+                          className="bg-gradient-to-r from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 text-white"
                         >
-                          <X className="h-4 w-4" />
+                          Review {pendingFiles.length} Files
+                          <ChevronRight className="h-4 w-4 ml-2" />
                         </Button>
                       )}
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {uploadStage === "confirm" && (
+            <div className="space-y-4">
+              <div className="space-y-3 max-h-96 overflow-y-auto">
+                {pendingFiles.map((file) => (
+                  <Card key={file.id} className="border-gray-200">
+                    <CardContent className="p-4">
+                      <div className="flex items-center space-x-4">
+                        <div className="p-2 bg-red-100 rounded-lg flex-shrink-0">
+                          <FileText className="h-5 w-5 text-red-600" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <Input
+                            value={file.name}
+                            onChange={(e) =>
+                              updatePendingFileName(file.id, e.target.value)
+                            }
+                            className="font-medium"
+                            placeholder="Enter file name"
+                          />
+                          <p className="text-sm text-gray-500 mt-1">
+                            {file.size}
+                          </p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removePendingFile(file.id)}
+                          className="text-gray-400 hover:text-red-600 flex-shrink-0"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
             </div>
           )}
+
+          {uploadStage === "uploading" && (
+            <div className="space-y-4">
+              {uploadedFiles.map((file) => (
+                <Card key={file.id} className="border-gray-200">
+                  <CardContent className="p-4">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <div className="p-2 bg-red-100 rounded-lg">
+                            <FileText className="h-5 w-5 text-red-600" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900">
+                              {file.name}
+                            </p>
+                            <p className="text-sm text-gray-500">{file.size}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Badge className={getStatusColor(file.status)}>
+                            {file.status}
+                          </Badge>
+                          {getStatusIcon(file.status)}
+                        </div>
+                      </div>
+                      {file.status !== "processed" &&
+                        file.status !== "error" && (
+                          <Progress value={file.progress} className="h-2" />
+                        )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
 
-        <DialogFooter>
-          {uploadStage === "select" && (
+        <DialogFooter className="gap-2">
+          {uploadStage === "select" && pendingFiles.length === 0 && (
             <Button variant="outline" onClick={handleClose}>
               Cancel
             </Button>
+          )}
+
+          {uploadStage === "select" && pendingFiles.length > 0 && (
+            <>
+              <Button variant="outline" onClick={handleClose}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => setUploadStage("confirm")}
+                className="bg-gradient-to-r from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 text-white"
+              >
+                Review Files
+                <ChevronRight className="h-4 w-4 ml-2" />
+              </Button>
+            </>
           )}
 
           {uploadStage === "confirm" && (
@@ -469,33 +473,29 @@ export default function FileUploadDialog({ children, onFilesUploaded }) {
               <Button
                 variant="outline"
                 onClick={() => setUploadStage("select")}
+                disabled={isUploading}
               >
                 Back
               </Button>
-              <Button variant="outline" onClick={handleClose}>
-                Cancel
+              <Button
+                onClick={handleStartUpload}
+                disabled={!canProceed || isUploading}
+                className="bg-gradient-to-r from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 text-white"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Upload {pendingFiles.length} Files
               </Button>
             </>
           )}
 
           {uploadStage === "uploading" && (
             <Button
-              variant="outline"
               onClick={handleClose}
               disabled={isUploading}
+              className="bg-gradient-to-r from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 text-white"
             >
-              {uploadedFiles.length > 0 &&
-              uploadedFiles.every((f) => f.status === "processed")
-                ? "Done"
-                : "Cancel"}
+              {isUploading ? "Uploading..." : "Done"}
             </Button>
-          )}
-
-          {isUploading && (
-            <div className="flex items-center space-x-2 text-sm text-gray-600">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-500" />
-              <span>Processing files...</span>
-            </div>
           )}
         </DialogFooter>
       </DialogContent>
