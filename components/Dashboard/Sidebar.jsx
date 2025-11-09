@@ -19,6 +19,10 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
+  PanelRightClose,
+  PanelRightOpen,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -61,18 +65,16 @@ export default function Sidebar({ isCollapsed, onToggle }) {
         </Link>
 
         {/* Collapse Toggle */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onToggle}
-          className="md:block hidden h-8 w-8 rounded-lg hover:bg-gray-100 transition-all duration-200"
-        >
-          {isCollapsed ? (
-            <ChevronRight className="h-4 w-4" />
-          ) : (
-            <ChevronLeft className="h-4 w-4" />
-          )}
-        </Button>
+        {!isCollapsed && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggle}
+            className="md:flex hidden h-8 w-8 rounded-lg hover:bg-gray-100 transition-all duration-200"
+          >
+            <PanelLeftClose className="h-4 w-4" />
+          </Button>
+        )}
       </div>
 
       {/* ─── Navigation Links ───────────────────────────────────── */}
@@ -169,6 +171,20 @@ export default function Sidebar({ isCollapsed, onToggle }) {
             )}
           </TooltipProvider>
         </nav>
+      </div>
+
+      {/* Collapse Toggle */}
+      <div className="flex justify-center">
+        {isCollapsed && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggle}
+            className="md:flex hidden w-20 h-20 rounded-full hover:bg-gray-100 transition-all duration-200 [&_svg]:size-7"
+          >
+            <PanelLeftOpen />
+          </Button>
+        )}
       </div>
 
       {/* ─── Bottom Section ─────────────────────────────────────── */}

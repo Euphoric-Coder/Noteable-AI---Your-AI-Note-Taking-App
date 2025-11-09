@@ -21,7 +21,7 @@ export default function DashboardLayout({ children }) {
       {/* Desktop Sidebar */}
       <aside
         className={`hidden xl:flex flex-col h-full border-r border-gray-200 dark:border-dark-500/50 bg-white dark:bg-dark-300 transition-all duration-500 ease-in-out ${
-          sidebarCollapsed ? "w-20" : "w-64"
+          sidebarCollapsed ? "w-24" : "w-64"
         }`}
       >
         <Sidebar isCollapsed={sidebarCollapsed} onToggle={toggleSidebar} />
@@ -36,7 +36,6 @@ export default function DashboardLayout({ children }) {
       )}
 
       {/* Mobile Sidebar Drawer (hidden completely on xl) */}
-      {/** 🧠 FIX: Wrap in `xl:hidden` so it is NOT mounted at all on desktop */}
       <aside
         className={`xl:hidden fixed inset-y-0 left-0 w-64 border-r border-gray-200 dark:border-dark-500/50 bg-white dark:bg-dark-300 transform transition-transform duration-500 ease-in-out z-50 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
