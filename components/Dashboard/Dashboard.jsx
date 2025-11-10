@@ -28,14 +28,18 @@ import FileUploadDialog from "@/components/FileUploadDialog";
 import RenameFileDialog from "@/components/RenameFileDialog";
 import { format } from "date-fns";
 import { toast } from "sonner";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
 
 export default function Dashboard() {
   const { user } = useUser();
-  const fetchUserFiles = useMutation(api.myQueries.fetchUserFiles);
-  const getURL = useMutation(api.storeFile.getFileURL);
+
+  // Real-time reactive Convex query
+  const fileData = useQuery(api.files.fetchUserFiles, {
+    createdBy: user?.primaryEmailAddress?.emailAddress,
+  });
+
   const [files, setFiles] = useState([]);
   const [totalStorageUsed, setTotalStorageUsed] = useState(0);
   const [renameDialog, setRenameDialog] = useState({
@@ -46,62 +50,25 @@ export default function Dashboard() {
 
   /** Fetch user files from Convex */
   useEffect(() => {
-    if (!user?.primaryEmailAddress?.emailAddress) return;
+    if (!fileData) return;
 
-    const fetchData = async () => {
-      try {
-        const fileData = await fetchUserFiles({
-          createdBy: user.primaryEmailAddress.emailAddress,
-        });
+    const formatted = fileData.map((file) => ({
+      id: file.fileId,
+      name: file.fileName,
+      uploadDate: file._creationTime
+        ? new Date(file._creationTime).toISOString()
+        : new Date().toISOString(),
+      size: `${file.storageSizeMB} MB`,
+      sizeBytes: parseFloat(file.storageSizeMB),
+      status: "processed",
+      fileURL: file.fileURL,
+    }));
 
-        if (fileData?.length) {
-          // Fetch storage sizes dynamically
-          const withSize = await Promise.all(
-            fileData.map(async (file) => {
-              try {
-                // Get file size via Convex Storage
-                const url = await getURL({ storageId: file.storageId });
-                const res = await fetch(url, { method: "HEAD" });
-                const sizeBytes = res.headers.get("content-length");
-                const sizeMB = (sizeBytes / (1024 * 1024)).toFixed(2);
-                return {
-                  id: file.fileId,
-                  name: file.fileName,
-                  uploadDate: file._creationTime
-                    ? new Date(file._creationTime).toISOString()
-                    : new Date().toISOString(),
-                  size: `${sizeMB} MB`,
-                  sizeBytes: parseFloat(sizeMB),
-                  status: "processed",
-                  fileURL: url,
-                };
-              } catch {
-                return {
-                  id: file.fileId,
-                  name: file.fileName,
-                  uploadDate: new Date().toISOString(),
-                  size: "0 MB",
-                  sizeBytes: 0,
-                  status: "error",
-                };
-              }
-            })
-          );
+    setFiles(formatted);
+    setTotalStorageUsed(formatted.reduce((sum, f) => sum + f.sizeBytes, 0));
+  }, [fileData]);
 
-          setFiles(withSize);
-          const total = withSize.reduce((sum, f) => sum + f.sizeBytes, 0);
-          setTotalStorageUsed(total);
-        }
-      } catch (err) {
-        console.error("Error fetching files:", err);
-        toast.error("Failed to fetch files");
-      }
-    };
-
-    fetchData();
-  }, [user, fetchUserFiles, getURL]);
-
-  /** ✏️ Rename handler */
+  /** Rename handler */
   const handleEdit = (fileId) => {
     const file = files.find((f) => f.id === fileId);
     if (file) {
@@ -122,7 +89,7 @@ export default function Dashboard() {
     toast.success(`File renamed to "${newName}"`);
   };
 
-  /** 🗑️ Delete handler */
+  /** Delete handler */
   const handleDelete = (fileId) => {
     const file = files.find((f) => f.id === fileId);
     if (file) {
@@ -131,13 +98,12 @@ export default function Dashboard() {
     }
   };
 
-  /** 📤 After upload */
+  /** After upload */
   const handleFilesUploaded = () => {
-    toast.info("Refreshing file list...");
-    setTimeout(() => window.location.reload(), 800);
+    toast.success("Files uploaded successfully!");
   };
 
-  /** 🌈 Helper for file status badge */
+  /** Helper for file status badge */
   const getStatusColor = (status) => {
     switch (status) {
       case "processed":
