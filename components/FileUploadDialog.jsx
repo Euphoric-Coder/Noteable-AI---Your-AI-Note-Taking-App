@@ -218,7 +218,11 @@ export default function FileUploadDialog({ children, onFilesUploaded }) {
       }}
     >
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+      <DialogContent
+        className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto"
+        onInteractOutside={(e) => e.preventDefault()} // prevents closing when clicking outside
+        onEscapeKeyDown={(e) => e.preventDefault()} // prevent closing with Esc
+      >
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2 text-xl">
             <div className="p-2 bg-gradient-to-r from-red-100 to-red-200 rounded-lg">
