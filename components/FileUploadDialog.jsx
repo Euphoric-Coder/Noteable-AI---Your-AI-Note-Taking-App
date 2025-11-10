@@ -22,9 +22,21 @@ import {
   Plus,
   ChevronRight,
 } from "lucide-react";
+import { useAction, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { useUser } from "@clerk/nextjs";
+import { v4 as uuidv4 } from "uuid";
+import axios from "axios";
+import { toast } from "sonner";
 
 export default function FileUploadDialog({ children, onFilesUploaded }) {
+  const { user } = useUser();
+  const generateUploadUrl = useMutation(api.uploadFile.generateUploadUrl);
+  const addPDF = useMutation(api.uploadFile.addFile);
+  const getURL = useMutation(api.storeFile.getFileURL);
+  const embedDocument = useAction(api.myActions.ingest);
   const [open, setOpen] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const [pendingFiles, setPendingFiles] = useState([]);
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -46,6 +58,18 @@ export default function FileUploadDialog({ children, onFilesUploaded }) {
     setUploadStage("confirm");
   };
 
+  const handleDrop = (event) => {
+    event.preventDefault();
+    setIsDragging(false);
+    const files = Array.from(event.dataTransfer.files);
+    handleFileSelection({ target: { files } });
+  };
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+  const handleDragLeave = () => setIsDragging(false);
+
   const handleStartUpload = async () => {
     if (pendingFiles.length === 0) return;
 
@@ -59,42 +83,64 @@ export default function FileUploadDialog({ children, onFilesUploaded }) {
       status: "uploading",
       progress: 0,
     }));
-
     setUploadedFiles(newFiles);
 
-    // Simulate upload progress
-    for (const file of newFiles) {
-      // Upload simulation
-      for (let progress = 0; progress <= 100; progress += 10) {
-        await new Promise((resolve) => setTimeout(resolve, 100));
+    for (const file of pendingFiles) {
+      const fileId = uuidv4();
+
+      try {
+        // Step 1: allocate Convex upload URL
+        const postUrl = await generateUploadUrl();
+
+        // Step 2: upload file blob
+        const upload = await fetch(postUrl, {
+          method: "POST",
+          headers: { "Content-Type": file.file.type },
+          body: file.file,
+        });
+        const { storageId } = await upload.json();
+
+        // Step 3: get public URL from Convex
+        const fileURL = await getURL({ storageId });
+
+        // Step 4: save metadata in Convex
+        await addPDF({
+          fileId,
+          storageId,
+          fileName: file.name,
+          fileURL,
+          createdBy: user?.primaryEmailAddress.emailAddress,
+        });
+
+        // Step 5: extract + embed the PDF
         setUploadedFiles((prev) =>
           prev.map((f) =>
-            f.id === file.id
-              ? {
-                  ...f,
-                  progress,
-                  status: progress === 100 ? "processing" : "uploading",
-                }
-              : f
+            f.id === file.id ? { ...f, status: "processing", progress: 100 } : f
           )
         );
-      }
 
-      // Processing simulation
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setUploadedFiles((prev) =>
-        prev.map((f) =>
-          f.id === file.id ? { ...f, status: "processed", progress: 100 } : f
-        )
-      );
+        const apiResponse = await axios.get("/api/load-pdf", {
+          params: { pdfURL: fileURL },
+        });
+        await embedDocument({ docOutput: apiResponse.data.result, fileId });
+
+        // Step 6: mark as processed
+        setUploadedFiles((prev) =>
+          prev.map((f) =>
+            f.id === file.id ? { ...f, status: "processed", progress: 100 } : f
+          )
+        );
+      } catch (err) {
+        console.error(err);
+        setUploadedFiles((prev) =>
+          prev.map((f) => (f.id === file.id ? { ...f, status: "error" } : f))
+        );
+      }
     }
 
     setIsUploading(false);
-
-    // Call callback if provided
-    if (onFilesUploaded) {
-      onFilesUploaded(newFiles);
-    }
+    toast.success("All files uploaded successfully!");
+    if (onFilesUploaded) onFilesUploaded(pendingFiles);
   };
 
   const removePendingFile = (fileId) => {
@@ -114,9 +160,6 @@ export default function FileUploadDialog({ children, onFilesUploaded }) {
       )
     );
   };
-
-  // Add missing import for ChevronRight
-  // (This should be added to the imports at the top of the file)
 
   const getStatusIcon = (status) => {
     switch (status) {
@@ -317,7 +360,16 @@ export default function FileUploadDialog({ children, onFilesUploaded }) {
                 </Card>
               )}
 
-              <Card className="border-2 border-dashed border-gray-200 hover:border-red-300 transition-colors">
+              <Card
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                className={`border-2 border-dashed transition-colors ${
+                  isDragging
+                    ? "border-red-400 bg-red-50"
+                    : "border-gray-200 hover:border-red-300"
+                }`}
+              >
                 <CardContent className="p-8">
                   <div className="text-center">
                     <div className="p-4 bg-gradient-to-r from-red-100 to-red-200 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">

@@ -14,6 +14,9 @@ import {
   Database,
   Activity,
   Plus,
+  PenBox,
+  ExternalLink,
+  MoreVertical,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -275,7 +278,7 @@ export default function Dashboard() {
                           onClick={() => handleEdit(file.id)}
                           className="border-gray-200 hover:border-red-200 hover:bg-red-50 transition-all duration-300"
                         >
-                          <Edit3 className="h-4 w-4" />
+                          <PenBox className="h-4 w-4" />
                         </Button>
 
                         <DropdownMenu modal={false}>
@@ -283,16 +286,22 @@ export default function Dashboard() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="border-gray-200 hover:border-gray-300"
+                              className="border-gray-200 hover:border-red-200 hover:bg-red-50 transition-all duration-300"
                             >
-                              <MoreHorizontal className="h-4 w-4" />
+                              <MoreVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem
                               onClick={() => handleEdit(file.id)}
                             >
-                              <Edit3 className="h-4 w-4 mr-2" />
+                              <ExternalLink className="h-4 w-4 mr-2" />
+                              View
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleEdit(file.id)}
+                            >
+                              <PenBox className="h-4 w-4 mr-2" />
                               Rename
                             </DropdownMenuItem>
                             <DropdownMenuItem
