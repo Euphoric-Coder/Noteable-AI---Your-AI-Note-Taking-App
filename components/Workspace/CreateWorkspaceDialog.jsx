@@ -103,9 +103,18 @@ export default function CreateWorkspaceDialog({ children }) {
 
   const removeDraft = async (id) => {
     const d = drafts.find((f) => f.id === id);
+
+    // Delete from Convex if uploaded
     if (d?.fileId) await deleteFile({ fileId: d.fileId });
+
+    // Remove from local state
     setDrafts((prev) => prev.filter((f) => f.id !== id));
+
+    // Resets the file input so same file can be reselected
+    const inputEl = document.getElementById("file-upload");
+    if (inputEl) inputEl.value = "";
   };
+
 
   const uploadDrafts = async () => {
     for (const d of drafts) {
