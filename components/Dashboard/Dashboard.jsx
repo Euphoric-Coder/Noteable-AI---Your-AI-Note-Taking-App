@@ -40,6 +40,10 @@ export default function Dashboard() {
     createdBy: user?.primaryEmailAddress?.emailAddress,
   });
 
+  // Mutations to Rename and Delete files
+  const renameFile = useMutation(api.files.renameFile);
+  const deleteFile = useMutation(api.files.deleteFile);
+
   const [files, setFiles] = useState([]);
   const [totalStorageUsed, setTotalStorageUsed] = useState(0);
   const [renameDialog, setRenameDialog] = useState({
@@ -80,21 +84,29 @@ export default function Dashboard() {
     }
   };
 
-  const handleRename = (newName) => {
-    setFiles((prev) =>
-      prev.map((file) =>
-        file.id === renameDialog.fileId ? { ...file, name: newName } : file
-      )
-    );
-    toast.success(`File renamed to "${newName}"`);
+  const handleRename = async (newName) => {
+    try {
+      await renameFile({
+        fileId: renameDialog.fileId,
+        newName,
+      });
+      toast.success(`File renamed to "${newName}"`);
+      setRenameDialog({ open: false, fileId: "", fileName: "" });
+    } catch {
+      toast.error("Failed to rename file.");
+    }
   };
 
   /** Delete handler */
-  const handleDelete = (fileId) => {
+  const handleDelete = async (fileId) => {
     const file = files.find((f) => f.id === fileId);
-    if (file) {
-      setFiles((prev) => prev.filter((f) => f.id !== fileId));
+    if (!file) return;
+
+    try {
+      await deleteFile({ fileId });
       toast.success(`"${file.name}" deleted successfully.`);
+    } catch {
+      toast.error("Failed to delete file.");
     }
   };
 

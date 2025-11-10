@@ -1,6 +1,7 @@
 import { v } from "convex/values";
-import { query } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 
+// Fetch files with optional filtering by creator or file ID
 export const fetchUserFiles = query({
   args: {
     createdBy: v.optional(v.string()),
@@ -51,5 +52,51 @@ export const fetchUserFiles = query({
     );
 
     return filesWithMeta;
+  },
+});
+
+// Rename a file by its fileId
+export const renameFile = mutation({
+  args: {
+    fileId: v.string(),
+    newName: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const file = await ctx.db
+      .query("pdfFiles")
+      .filter((q) => q.eq(q.field("fileId"), args.fileId))
+      .first();
+
+    if (!file) throw new Error("File not found");
+
+    await ctx.db.patch(file._id, { fileName: args.newName });
+    return { success: true };
+  },
+});
+
+// Delete a file by its fileId
+export const deleteFile = mutation({
+  args: {
+    fileId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const file = await ctx.db
+      .query("pdfFiles")
+      .filter((q) => q.eq(q.field("fileId"), args.fileId))
+      .first();
+
+    if (!file) throw new Error("File not found");
+
+    // Delete from storage
+    try {
+      await ctx.storage.delete(file.storageId);
+    } catch (err) {
+      console.error("Storage deletion failed:", err);
+    }
+
+    // Delete from database
+    await ctx.db.delete(file._id);
+
+    return { success: true };
   },
 });
