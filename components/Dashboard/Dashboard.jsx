@@ -1,12 +1,11 @@
-import { useState } from "react";
+"use client";
+
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
-  MoveHorizontal as MoreHorizontal,
-  CreditCard as Edit3,
-  Trash2,
   FileText,
   Upload,
   Calendar,
@@ -16,6 +15,7 @@ import {
   Plus,
   PenBox,
   ExternalLink,
+  Trash2,
   MoreVertical,
 } from "lucide-react";
 import {
@@ -28,37 +28,86 @@ import FileUploadDialog from "@/components/FileUploadDialog";
 import RenameFileDialog from "@/components/RenameFileDialog";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { useUser } from "@clerk/nextjs";
 
 export default function Dashboard() {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [files, setFiles] = useState([
-    {
-      id: "1",
-      name: "Product Requirements Document.pdf",
-      uploadDate: "2025-01-12",
-      size: "2.4 MB",
-      status: "processed",
-    },
-    {
-      id: "2",
-      name: "User Research Analysis.pdf",
-      uploadDate: "2025-01-10",
-      size: "1.8 MB",
-      status: "processed",
-    },
-  ]);
+  const { user } = useUser();
+  const fetchUserFiles = useMutation(api.myQueries.fetchUserFiles);
+  const getURL = useMutation(api.storeFile.getFileURL);
+  const [files, setFiles] = useState([]);
+  const [totalStorageUsed, setTotalStorageUsed] = useState(0);
   const [renameDialog, setRenameDialog] = useState({
     open: false,
     fileId: "",
     fileName: "",
   });
 
+  /** Fetch user files from Convex */
+  useEffect(() => {
+    if (!user?.primaryEmailAddress?.emailAddress) return;
+
+    const fetchData = async () => {
+      try {
+        const fileData = await fetchUserFiles({
+          createdBy: user.primaryEmailAddress.emailAddress,
+        });
+
+        if (fileData?.length) {
+          // Fetch storage sizes dynamically
+          const withSize = await Promise.all(
+            fileData.map(async (file) => {
+              try {
+                // Get file size via Convex Storage
+                const url = await getURL({ storageId: file.storageId });
+                const res = await fetch(url, { method: "HEAD" });
+                const sizeBytes = res.headers.get("content-length");
+                const sizeMB = (sizeBytes / (1024 * 1024)).toFixed(2);
+                return {
+                  id: file.fileId,
+                  name: file.fileName,
+                  uploadDate: file._creationTime
+                    ? new Date(file._creationTime).toISOString()
+                    : new Date().toISOString(),
+                  size: `${sizeMB} MB`,
+                  sizeBytes: parseFloat(sizeMB),
+                  status: "processed",
+                  fileURL: url,
+                };
+              } catch {
+                return {
+                  id: file.fileId,
+                  name: file.fileName,
+                  uploadDate: new Date().toISOString(),
+                  size: "0 MB",
+                  sizeBytes: 0,
+                  status: "error",
+                };
+              }
+            })
+          );
+
+          setFiles(withSize);
+          const total = withSize.reduce((sum, f) => sum + f.sizeBytes, 0);
+          setTotalStorageUsed(total);
+        }
+      } catch (err) {
+        console.error("Error fetching files:", err);
+        toast.error("Failed to fetch files");
+      }
+    };
+
+    fetchData();
+  }, [user, fetchUserFiles, getURL]);
+
+  /** ✏️ Rename handler */
   const handleEdit = (fileId) => {
     const file = files.find((f) => f.id === fileId);
     if (file) {
       setRenameDialog({
         open: true,
-        fileId: fileId,
+        fileId,
         fileName: file.name,
       });
     }
@@ -70,30 +119,25 @@ export default function Dashboard() {
         file.id === renameDialog.fileId ? { ...file, name: newName } : file
       )
     );
-    toast.success(`File has been renamed to "${newName}"`);
+    toast.success(`File renamed to "${newName}"`);
   };
 
+  /** 🗑️ Delete handler */
   const handleDelete = (fileId) => {
     const file = files.find((f) => f.id === fileId);
     if (file) {
       setFiles((prev) => prev.filter((f) => f.id !== fileId));
-      toast.success(`"${file.name}" has been deleted successfully.`);
+      toast.success(`"${file.name}" deleted successfully.`);
     }
   };
 
-  const handleFilesUploaded = (uploadedFiles) => {
-    const newFiles = uploadedFiles.map((file) => ({
-      id: file.id,
-      name: file.name,
-      uploadDate: new Date().toISOString().split("T")[0],
-      size: file.size,
-      status: "processed",
-    }));
-
-    setFiles((prev) => [...prev, ...newFiles]);
-    toast.success(`${uploadedFiles.length} file(s) uploaded successfully.`);
+  /** 📤 After upload */
+  const handleFilesUploaded = () => {
+    toast.info("Refreshing file list...");
+    setTimeout(() => window.location.reload(), 800);
   };
 
+  /** 🌈 Helper for file status badge */
   const getStatusColor = (status) => {
     switch (status) {
       case "processed":
@@ -107,11 +151,15 @@ export default function Dashboard() {
     }
   };
 
+  const totalFiles = files.length;
+  const storageLimit = 10; // Example 10 MB limit
+  const usedPercent = Math.min((totalStorageUsed / storageLimit) * 100, 100);
+
   return (
     <div className="flex h-screen bg-gradient-to-br from-gray-50 via-white to-red-50/20">
-      <div className="flex-1 flex flex-col overflow-hidden lg:ml-0 ml-0">
+      <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="bg-white/80 backdrop-blur-sm border-b border-gray-100 px-6 py-6 shadow-sm lg:pl-6 pl-16">
+        <div className="bg-white/80 backdrop-blur-sm border-b border-gray-100 px-6 py-6 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
@@ -131,11 +179,12 @@ export default function Dashboard() {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 overflow-auto p-6 space-y-8 lg:pl-6 pl-6">
+        <div className="flex-1 overflow-auto p-6 space-y-8">
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl hover:shadow-red-100/30 transition-all duration-300 hover:-translate-y-1">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            {/* Total Files */}
+            <Card className="bg-white/80 border-0 shadow-lg hover:shadow-xl hover:shadow-red-100/30 transition-all duration-300 hover:-translate-y-1">
+              <CardHeader className="flex flex-row items-center justify-between pb-3">
                 <CardTitle className="text-sm font-medium text-gray-600">
                   Total Files
                 </CardTitle>
@@ -144,17 +193,22 @@ export default function Dashboard() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-gray-900 mb-1">2</div>
+                <div className="text-3xl font-bold text-gray-900 mb-1">
+                  {totalFiles}
+                </div>
                 <div className="flex items-center text-sm">
                   <TrendingUp className="h-3 w-3 text-green-500 mr-1" />
-                  <span className="text-green-600 font-medium">+0%</span>
+                  <span className="text-green-600 font-medium">
+                    +{totalFiles > 0 ? 10 : 0}%
+                  </span>
                   <span className="text-gray-500 ml-1">from last month</span>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl hover:shadow-red-100/30 transition-all duration-300 hover:-translate-y-1">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            {/* Storage Used */}
+            <Card className="bg-white/80 border-0 shadow-lg hover:shadow-xl hover:shadow-red-100/30 transition-all duration-300 hover:-translate-y-1">
+              <CardHeader className="flex flex-row items-center justify-between pb-3">
                 <CardTitle className="text-sm font-medium text-gray-600">
                   Storage Used
                 </CardTitle>
@@ -164,22 +218,25 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-gray-900 mb-1">
-                  4.2 MB
+                  {totalStorageUsed.toFixed(2)} MB
                 </div>
                 <div className="flex items-center text-sm">
                   <div className="w-full bg-gray-200 rounded-full h-1.5 mr-2">
                     <div
                       className="bg-gradient-to-r from-purple-400 to-purple-500 h-1.5 rounded-full"
-                      style={{ width: "40%" }}
+                      style={{ width: `${usedPercent}%` }}
                     ></div>
                   </div>
-                  <span className="text-gray-500">40% of 10 MB</span>
+                  <span className="text-gray-500">
+                    {usedPercent.toFixed(0)}% of {storageLimit} MB
+                  </span>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl hover:shadow-red-100/30 transition-all duration-300 hover:-translate-y-1">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            {/* AI Searches */}
+            <Card className="bg-white/80 border-0 shadow-lg hover:shadow-xl hover:shadow-red-100/30 transition-all duration-300 hover:-translate-y-1">
+              <CardHeader className="flex flex-row items-center justify-between pb-3">
                 <CardTitle className="text-sm font-medium text-gray-600">
                   AI Searches
                 </CardTitle>
@@ -198,8 +255,8 @@ export default function Dashboard() {
             </Card>
           </div>
 
-          {/* Files Section */}
-          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+          {/* Uploaded Files List */}
+          <Card className="bg-white/80 border-0 shadow-lg">
             <CardHeader className="pb-4">
               <CardTitle className="flex items-center justify-between text-xl font-semibold text-gray-900">
                 <div className="flex items-center space-x-3">
@@ -220,9 +277,7 @@ export default function Dashboard() {
             <CardContent>
               {files.length === 0 ? (
                 <div className="text-center py-16">
-                  <div className="p-4 bg-gradient-to-r from-gray-100 to-gray-200 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
-                    <FileText className="h-10 w-10 text-gray-400" />
-                  </div>
+                  <FileText className="h-10 w-10 text-gray-400 mx-auto mb-6" />
                   <h3 className="text-xl font-semibold text-gray-900 mb-3">
                     No files uploaded yet
                   </h3>
@@ -231,7 +286,7 @@ export default function Dashboard() {
                     document analysis
                   </p>
                   <FileUploadDialog onFilesUploaded={handleFilesUploaded}>
-                    <Button className="bg-gradient-to-r from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 text-white shadow-lg hover:shadow-xl hover:shadow-red-200/50 transition-all duration-300 transform hover:-translate-y-1">
+                    <Button className="bg-gradient-to-r from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                       <Plus className="h-4 w-4 mr-2" />
                       Upload Your First PDF
                     </Button>
@@ -242,7 +297,7 @@ export default function Dashboard() {
                   {files.map((file) => (
                     <div
                       key={file.id}
-                      className="flex items-center justify-between p-5 bg-gradient-to-r from-gray-50 to-white rounded-xl hover:from-red-50 hover:to-white transition-all duration-300 border border-gray-100 hover:border-red-200 hover:shadow-md group"
+                      className="flex items-center justify-between p-5 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-100 hover:border-red-200 hover:shadow-md transition-all duration-300 group"
                     >
                       <div className="flex items-center space-x-5">
                         <div className="p-3 bg-gradient-to-r from-red-100 to-red-200 rounded-xl group-hover:from-red-200 group-hover:to-red-300 transition-all duration-300">
@@ -263,7 +318,9 @@ export default function Dashboard() {
                             <span className="font-medium">{file.size}</span>
                             <Badge
                               variant="secondary"
-                              className={`${getStatusColor(file.status)} px-2 py-1 text-xs font-medium`}
+                              className={`${getStatusColor(
+                                file.status
+                              )} px-2 py-1 text-xs font-medium`}
                             >
                               {file.status}
                             </Badge>
@@ -275,12 +332,13 @@ export default function Dashboard() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleEdit(file.id)}
+                          onClick={() =>
+                            window.open(file.fileURL, "_blank", "noopener")
+                          }
                           className="border-gray-200 hover:border-red-200 hover:bg-red-50 transition-all duration-300"
                         >
-                          <PenBox className="h-4 w-4" />
+                          <ExternalLink className="h-4 w-4" />
                         </Button>
-
                         <DropdownMenu modal={false}>
                           <DropdownMenuTrigger asChild>
                             <Button
@@ -292,12 +350,6 @@ export default function Dashboard() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() => handleEdit(file.id)}
-                            >
-                              <ExternalLink className="h-4 w-4 mr-2" />
-                              View
-                            </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => handleEdit(file.id)}
                             >
@@ -321,7 +373,6 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          {/* Rename Dialog */}
           <RenameFileDialog
             open={renameDialog.open}
             onOpenChange={(open) =>
