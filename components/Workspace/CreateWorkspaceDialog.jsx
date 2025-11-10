@@ -133,6 +133,12 @@ export default function CreateWorkspaceDialog({ children }) {
           createdBy: user?.primaryEmailAddress?.emailAddress || "unknown",
         });
 
+        setDrafts((prev) =>
+          prev.map((f) =>
+            f.id === d.id ? { ...f, status: "embedding", fileURL } : f
+          )
+        );
+
         const apiRes = await axios.get("/api/load-pdf", {
           params: { pdfURL: fileURL },
         });
@@ -347,13 +353,20 @@ export default function CreateWorkspaceDialog({ children }) {
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
+                            {d.status === "pending" && (
+                              <Badge className="bg-gray-200 text-gray-700 text-xs">
+                                pending
+                              </Badge>
+                            )}
                             {d.status === "uploading" && (
-                              <div className="flex items-center gap-1">
-                                <Loader2 className="h-4 w-4 animate-spin text-red-500" />
-                                <span className="text-xs text-red-500 font-medium">
-                                  Uploading...
-                                </span>
-                              </div>
+                              <Badge className="bg-yellow-100 text-yellow-700 text-xs">
+                                Uploading...
+                              </Badge>
+                            )}
+                            {d.status === "embedding" && (
+                              <Badge className="bg-blue-100 text-blue-700 text-xs">
+                                Embedding...
+                              </Badge>
                             )}
                             {d.status === "done" && (
                               <Badge className="bg-green-100 text-green-700 text-xs">
