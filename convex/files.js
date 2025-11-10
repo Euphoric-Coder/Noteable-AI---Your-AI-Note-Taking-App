@@ -77,26 +77,51 @@ export const renameFile = mutation({
 // Delete a file by its fileId
 export const deleteFile = mutation({
   args: {
-    fileId: v.string(),
+    fileId: v.optional(v.string()),
+    storageId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const file = await ctx.db
-      .query("pdfFiles")
-      .filter((q) => q.eq(q.field("fileId"), args.fileId))
-      .first();
+    // 🔹 Find file either by fileId or storageId
+    let file = null;
 
-    if (!file) throw new Error("File not found");
+    if (args.fileId) {
+      file = await ctx.db
+        .query("pdfFiles")
+        .filter((q) => q.eq(q.field("fileId"), args.fileId))
+        .first();
+    } else if (args.storageId) {
+      file = await ctx.db
+        .query("pdfFiles")
+        .filter((q) => q.eq(q.field("storageId"), args.storageId))
+        .first();
+    }
 
-    // Delete from storage
+    if (!file) throw new Error("File not found for given ID");
+
+    // 🔹 Delete from Convex storage
     try {
       await ctx.storage.delete(file.storageId);
     } catch (err) {
       console.error("Storage deletion failed:", err);
     }
 
-    // Delete from database
+    // 🔹 Delete the file record
     await ctx.db.delete(file._id);
 
-    return { success: true };
+    // 🔹 Delete all related embeddings (documents)
+    const relatedDocs = await ctx.db
+      .query("documents")
+      .filter((q) => q.eq(q.field("metadata.fileId"), file.fileId))
+      .collect();
+
+    for (const doc of relatedDocs) {
+      await ctx.db.delete(doc._id);
+    }
+
+    console.log(
+      `Deleted ${relatedDocs.length} embedding documents for fileId: ${file.fileId}`
+    );
+
+    return { success: true, deletedEmbeddings: relatedDocs.length };
   },
 });

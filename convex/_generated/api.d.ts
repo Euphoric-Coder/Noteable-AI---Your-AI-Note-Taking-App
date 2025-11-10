@@ -19,6 +19,7 @@ import type * as myActions from "../myActions.js";
 import type * as storeFile from "../storeFile.js";
 import type * as uploadFile from "../uploadFile.js";
 import type * as user from "../user.js";
+import type * as workspace from "../workspace.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -35,6 +36,7 @@ declare const fullApi: ApiFromModules<{
   storeFile: typeof storeFile;
   uploadFile: typeof uploadFile;
   user: typeof user;
+  workspace: typeof workspace;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,

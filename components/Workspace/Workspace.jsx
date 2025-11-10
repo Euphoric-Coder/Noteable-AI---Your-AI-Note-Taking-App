@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { FolderOpen, FileText, Plus, Clock } from "lucide-react";
 import CreateWorkspaceDialog from "@/components/Workspace/CreateWorkspaceDialog";
 import { format } from "date-fns";
+import { useUser } from "@clerk/nextjs";
 
 export default function Workspace() {
+  const { user } = useUser();
   const workspaces = [
     {
       id: "1",
@@ -49,7 +51,7 @@ export default function Workspace() {
                 Organize your documents into workspaces
               </p>
             </div>
-            <CreateWorkspaceDialog>
+            <CreateWorkspaceDialog userId={user?.primaryEmailAddress?.emailAddress}>
               <Button className="bg-red-400 hover:bg-red-500 text-white">
                 <Plus className="h-4 w-4 mr-2" />
                 New Workspace
@@ -70,7 +72,7 @@ export default function Workspace() {
                 Create your first workspace to organize your documents and
                 collaborate with others.
               </p>
-              <CreateWorkspaceDialog>
+              <CreateWorkspaceDialog userId={user?.primaryEmailAddress?.emailAddress}>
                 <Button className="bg-red-400 hover:bg-red-500 text-white">
                   <Plus className="h-4 w-4 mr-2" />
                   Create Your First Workspace
@@ -124,7 +126,10 @@ export default function Workspace() {
                           <div className="flex items-center text-gray-500">
                             <Clock className="h-4 w-4 mr-1" />
                             <span>
-                              {format(new Date(workspace.lastModified), "dd/mm/yyyy")}
+                              {format(
+                                new Date(workspace.lastModified),
+                                "dd/mm/yyyy"
+                              )}
                             </span>
                           </div>
                         </div>
