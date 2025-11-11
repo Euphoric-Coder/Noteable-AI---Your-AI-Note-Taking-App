@@ -8,36 +8,24 @@ import { FolderOpen, FileText, Plus, Clock } from "lucide-react";
 import CreateWorkspaceDialog from "@/components/Workspace/CreateWorkspaceDialog";
 import { format } from "date-fns";
 import { useUser } from "@clerk/nextjs";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 export default function Workspace() {
   const { user } = useUser();
-  const workspaces = [
-    {
-      id: "1",
-      name: "Product Research",
-      description: "Documents related to product research and user analysis",
-      fileCount: 5,
-      lastModified: "2025-01-12",
-      status: "active",
-    },
-    {
-      id: "2",
-      name: "Technical Documentation",
-      description:
-        "API docs, technical specifications, and architecture guides",
-      fileCount: 8,
-      lastModified: "2025-01-10",
-      status: "active",
-    },
-    {
-      id: "3",
-      name: "Marketing Materials",
-      description: "Brochures, case studies, and marketing documentation",
-      fileCount: 3,
-      lastModified: "2025-01-08",
-      status: "active",
-    },
-  ];
+  const workspaces = useQuery(api.workspace.fetchUserWorkspaces, {
+    createdBy: user?.primaryEmailAddress?.emailAddress,
+  });
+
+  if (!workspaces) {
+    return (
+      <div className="flex h-screen items-center justify-center text-gray-500">
+        Loading workspaces...
+      </div>
+    );
+  }
+
+  console.log("Fetched workspaces:", workspaces);
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -51,7 +39,9 @@ export default function Workspace() {
                 Organize your documents into workspaces
               </p>
             </div>
-            <CreateWorkspaceDialog userId={user?.primaryEmailAddress?.emailAddress}>
+            <CreateWorkspaceDialog
+              userId={user?.primaryEmailAddress?.emailAddress}
+            >
               <Button className="bg-red-400 hover:bg-red-500 text-white">
                 <Plus className="h-4 w-4 mr-2" />
                 New Workspace
@@ -72,7 +62,9 @@ export default function Workspace() {
                 Create your first workspace to organize your documents and
                 collaborate with others.
               </p>
-              <CreateWorkspaceDialog userId={user?.primaryEmailAddress?.emailAddress}>
+              <CreateWorkspaceDialog
+                userId={user?.primaryEmailAddress?.emailAddress}
+              >
                 <Button className="bg-red-400 hover:bg-red-500 text-white">
                   <Plus className="h-4 w-4 mr-2" />
                   Create Your First Workspace
@@ -126,10 +118,7 @@ export default function Workspace() {
                           <div className="flex items-center text-gray-500">
                             <Clock className="h-4 w-4 mr-1" />
                             <span>
-                              {format(
-                                new Date(workspace.lastModified),
-                                "dd/mm/yyyy"
-                              )}
+                              {format(workspace.updatedAt, "PPP")}
                             </span>
                           </div>
                         </div>

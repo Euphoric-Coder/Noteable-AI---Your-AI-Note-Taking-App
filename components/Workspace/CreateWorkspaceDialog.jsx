@@ -230,6 +230,7 @@ export default function CreateWorkspaceDialog({ children }) {
         {!showSummary && (
           <DialogContent
             onInteractOutside={(e) => e.preventDefault()}
+            onEscapeKeyDown={(e) => e.preventDefault()}
             className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto"
           >
             <DialogHeader>

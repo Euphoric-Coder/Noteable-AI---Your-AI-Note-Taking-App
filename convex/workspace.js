@@ -1,3 +1,4 @@
+import { eachHourOfInterval } from "date-fns";
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
@@ -40,27 +41,39 @@ export const createWorkspace = mutation({
 
 /* ---------- FETCH USER WORKSPACES ---------- */
 export const fetchUserWorkspaces = query({
-  args: { createdBy: v.string() },
+  args: {
+    createdBy: v.optional(v.string()),
+  },
   handler: async (ctx, args) => {
+    // 1️⃣ Fetch workspaces created by this user (or all if admin/debug)
     const workspaces = await ctx.db
       .query("workspaces")
-      .filter((q) => q.eq(q.field("createdBy"), args.createdBy))
+      .filter((q) =>
+        args.createdBy ? q.eq(q.field("createdBy"), args.createdBy) : true
+      )
+      .order("desc")
       .collect();
 
-    // Also count files linked to each workspace
-    const enriched = await Promise.all(
-      workspaces.map(async (ws) => {
-        const fileCount = await ctx.db
-          .query("pdfFiles")
-          .withIndex("by_workspace", (q) => q.eq("workspaceId", ws.workspaceId))
-          .collect();
+    // 2️⃣ Normalize + enrich workspace data for frontend display
+    const enriched = workspaces.map((ws) => {
+      const fileCount =
+        ws.fileCount ?? (Array.isArray(ws.fileIds) ? ws.fileIds.length : 0);
 
-        return {
-          ...ws,
-          fileCount: fileCount.length,
-        };
-      })
-    );
+      return {
+        id: ws.workspaceId,
+        name: ws.name,
+        description: ws.description || "No description provided.",
+        createdBy: ws.createdBy,
+        fileCount,
+        status: ws.status || "active",
+        createdAt: ws.createdAt
+          ? new Date(ws.createdAt).toISOString()
+          : new Date(ws._creationTime).toISOString(),
+        updatedAt: ws.updatedAt
+          ? new Date(ws.updatedAt).toISOString()
+          : new Date(ws._creationTime).toISOString(),
+      };
+    });
 
     return enriched;
   },
