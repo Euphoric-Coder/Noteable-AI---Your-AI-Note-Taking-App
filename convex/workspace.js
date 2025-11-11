@@ -79,6 +79,34 @@ export const fetchUserWorkspaces = query({
   },
 });
 
+export const fetchWorkspaceById = query({
+  args: { workspaceId: v.string() },
+  handler: async (ctx, args) => {
+    const workspace = await ctx.db
+      .query("workspaces")
+      .filter((q) => q.eq(q.field("workspaceId"), args.workspaceId))
+      .first();
+
+    if (!workspace) return null;
+
+    // Fetch related PDF files using stored fileIds
+    let files = [];
+    if (workspace.fileIds && workspace.fileIds.length > 0) {
+      files = await Promise.all(
+        workspace.fileIds.map(async (fileId) => {
+          const file = await ctx.db
+            .query("pdfFiles")
+            .filter((q) => q.eq(q.field("fileId"), fileId))
+            .first();
+          return file || null;
+        })
+      );
+    }
+
+    return { workspace, files: files.filter(Boolean) };
+  },
+});
+
 /* ---------- DELETE WORKSPACE ---------- */
 export const deleteWorkspace = mutation({
   args: { workspaceId: v.string() },

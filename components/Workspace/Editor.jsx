@@ -19,8 +19,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-
-import { useState } from "react";
 import {
   Tooltip,
   TooltipContent,
@@ -39,21 +37,21 @@ import { useUser } from "@clerk/nextjs";
 import { Sparkles, Trash } from "lucide-react";
 import { useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { useParams } from "next/navigation";
 import { aiAssist } from "@/lib/aiAssist";
 import { toast } from "sonner";
+import { useState } from "react";
 
-const MenuBar = ({ editor }) => {
-  const fileId = useParams();
-  console.log(fileId.id);
+const MenuBar = ({ editor, fileId }) => {
   const vectorSearchQuery = useAction(api.myActions.search);
   const [linkDialog, setLinkDialog] = useState(false);
   const [aiSuggestDialog, setAiSuggestDialog] = useState(false);
   const [selectedText, setSelectedText] = useState("");
+  const [manualText, setManualText] = useState("");
   const [url, setUrl] = useState("");
 
   if (!editor) return null;
 
+  // 🔗 Insert link
   const insertLink = () => {
     if (url) {
       editor.chain().focus().setLink({ href: url }).run();
@@ -62,29 +60,53 @@ const MenuBar = ({ editor }) => {
     }
   };
 
-  const searchAi = async ({ text }) => {
-    toast.info("AI is thinking.. please wait");
-
-    const queryResult = JSON.parse(
-      await vectorSearchQuery({ query: text, fileId: fileId.id })
-    );
-
-    const response = await aiAssist(text, queryResult[0].pageContent);
-
-    console.log(response.replace("```", ""));
-    console.log(`
-        <p><strong>${text}</strong></p>
-        ${response.replace("```", "")}
-        `);
-
-    if (response.replace("```", "") === "" || response.replace("```", "") === `""`) {
-      toast.error(
-        "No response from AI can be generated! Please ask a different question."
-      );
+  // 🤖 Run AI Search and Insert Suggestion
+  const runAiSuggestion = async (text) => {
+    if (!text.trim()) {
+      toast.error("Please enter some text for AI suggestion.");
       return;
-    } else {
+    }
+
+    toast.info("✨ AI is thinking... please wait");
+    try {
+      const queryResult = JSON.parse(
+        await vectorSearchQuery({ query: text, fileId: fileId.id })
+      );
+
+      const response = await aiAssist(text, queryResult[0]?.pageContent || "");
+
+      const cleanResponse = response.replace(/```/g, "").trim();
+
+      if (!cleanResponse || cleanResponse === `""`) {
+        toast.error("No meaningful AI response. Try rephrasing your query.");
+        return;
+      }
+
       editor.commands.insertContent(`<strong>${text}</strong>`);
-      editor.commands.insertContent(`${response.replace("```", "")}`);
+      editor.commands.insertContent(cleanResponse);
+
+      toast.success("AI suggestion inserted successfully!");
+    } catch (err) {
+      console.error(err);
+      toast.error("AI suggestion failed. Try again.");
+    }
+  };
+
+  // ✨ Handle Sparkles Button Click
+  const handleAiSuggest = () => {
+    const { view, state } = editor;
+    const { from, to } = view.state.selection;
+    const selected = state.doc.textBetween(from, to, "").trim();
+
+    if (selected) {
+      // If text selected, run AI immediately
+      setSelectedText(selected);
+      console.log("Selected Text for AI Suggestion:", selected);
+      console.log("File ID for AI Suggestion:", fileId);
+      // runAiSuggestion(selected);
+    } else {
+      // If no selection, open manual input dialog
+      setAiSuggestDialog(true);
     }
   };
 
@@ -98,12 +120,12 @@ const MenuBar = ({ editor }) => {
   return (
     <div className="sticky top-0 z-50 flex flex-wrap items-center justify-between rounded-tr-2xl rounded-tl-2xl gap-2 border-r border-l border-2 border-gray-300 p-4 backdrop-blur-md bg-white/60 dark:bg-slate-900/60">
       <div className="flex items-center">
+        {/* Headings */}
         {[1, 2, 3].map((level) => (
           <TooltipProvider key={level}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
-                  key={level}
                   className={buttonStyle(editor.isActive("heading", { level }))}
                   onClick={() =>
                     editor.chain().focus().toggleHeading({ level }).run()
@@ -119,86 +141,57 @@ const MenuBar = ({ editor }) => {
           </TooltipProvider>
         ))}
 
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                className={buttonStyle(editor.isActive("bulletList"))}
-                onClick={() => editor.chain().focus().toggleBulletList().run()}
-              >
-                <MdFormatListBulleted size={30} className="mr-1" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Bullet List</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        {/* Basic Formatting */}
+        {[
+          {
+            icon: <MdFormatListBulleted size={24} />,
+            action: () => editor.chain().focus().toggleBulletList().run(),
+            active: editor.isActive("bulletList"),
+            label: "Bullet List",
+          },
+          {
+            icon: <MdFormatListNumbered size={24} />,
+            action: () => editor.chain().focus().toggleOrderedList().run(),
+            active: editor.isActive("orderedList"),
+            label: "Numbered List",
+          },
+          {
+            icon: <MdFormatBold size={24} />,
+            action: () => editor.chain().focus().toggleBold().run(),
+            active: editor.isActive("bold"),
+            label: "Bold",
+          },
+          {
+            icon: <MdFormatItalic size={24} />,
+            action: () => editor.chain().focus().toggleItalic().run(),
+            active: editor.isActive("italic"),
+            label: "Italic",
+          },
+          {
+            icon: <MdFormatQuote size={24} />,
+            action: () => editor.chain().focus().toggleBlockquote().run(),
+            active: editor.isActive("blockquote"),
+            label: "Quote",
+          },
+        ].map((btn, i) => (
+          <TooltipProvider key={i}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  className={buttonStyle(btn.active)}
+                  onClick={btn.action}
+                >
+                  {btn.icon}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{btn.label}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ))}
 
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                className={buttonStyle(editor.isActive("orderedList"))}
-                onClick={() => editor.chain().focus().toggleOrderedList().run()}
-              >
-                <MdFormatListNumbered size={30} className="mr-1" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Numbered List</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                className={buttonStyle(editor.isActive("bold"))}
-                onClick={() => editor.chain().focus().toggleBold().run()}
-              >
-                <MdFormatBold size={30} className="mr-1" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Bold</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                className={buttonStyle(editor.isActive("italic"))}
-                onClick={() => editor.chain().focus().toggleItalic().run()}
-              >
-                <MdFormatItalic size={30} className="mr-1" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Italics</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                className={buttonStyle(editor.isActive("blockquote"))}
-                onClick={() => editor.chain().focus().toggleBlockquote().run()}
-              >
-                <MdFormatQuote size={30} className="mr-1" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Quote</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-
+        {/* Link Button */}
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -210,25 +203,16 @@ const MenuBar = ({ editor }) => {
               </button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Link</p>
+              <p>Insert Link</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
 
+        {/* AI Suggest */}
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <button
-                onClick={() => {
-                  setAiSuggestDialog(true);
-                  const { view, state } = editor;
-                  const { from, to } = view.state.selection;
-                  const text = state.doc.textBetween(from, to, "");
-                  setSelectedText(text);
-                  searchAi({ text });
-                }}
-                className={buttonStyle()}
-              >
+              <button onClick={handleAiSuggest} className={buttonStyle()}>
                 <Sparkles className="mr-1" />
               </button>
             </TooltipTrigger>
@@ -239,17 +223,16 @@ const MenuBar = ({ editor }) => {
         </TooltipProvider>
       </div>
 
-      <button onClick={() => editor.commands.clearContent(true)}>
+      {/* Clear Content */}
+      <button
+        onClick={() => editor.commands.clearContent(true)}
+        className="text-gray-500 hover:text-red-500 transition"
+      >
         <Trash />
       </button>
 
-      <Dialog
-        open={linkDialog}
-        onOpenChange={() => {
-          setLinkDialog(false);
-          setUrl("");
-        }}
-      >
+      {/* ─────────────── Link Dialog ─────────────── */}
+      <Dialog open={linkDialog} onOpenChange={setLinkDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Insert Link</DialogTitle>
@@ -262,29 +245,40 @@ const MenuBar = ({ editor }) => {
           />
           <DialogFooter>
             <DialogClose asChild>
-              <Button>Cancel</Button>
+              <Button variant="outline">Cancel</Button>
             </DialogClose>
             <Button onClick={insertLink}>Insert</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      <Dialog
-        open={aiSuggestDialog && !selectedText}
-        onOpenChange={() => {
-          setAiSuggestDialog(false);
-        }}
-      >
+      {/* ─────────────── AI Suggest Dialog ─────────────── */}
+      <Dialog open={aiSuggestDialog} onOpenChange={setAiSuggestDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Insert Link</DialogTitle>
+            <DialogTitle>AI Suggest</DialogTitle>
           </DialogHeader>
-          {selectedText.trim() ? "true" : "false"}
+          <p className="text-sm text-gray-600 mb-2">
+            Enter a topic or question for AI to suggest content:
+          </p>
+          <Input
+            placeholder="e.g., Explain the concept of cloud computing"
+            value={manualText}
+            onChange={(e) => setManualText(e.target.value)}
+          />
           <DialogFooter>
             <DialogClose asChild>
-              <Button>Cancel</Button>
+              <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <Button onClick={insertLink}>Insert</Button>
+            <Button
+              onClick={() => {
+                runAiSuggestion(manualText);
+                setAiSuggestDialog(false);
+                setManualText("");
+              }}
+            >
+              Insert
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -292,7 +286,7 @@ const MenuBar = ({ editor }) => {
   );
 };
 
-export default function Editor() {
+export default function Editor({ fileId }) {
   const [content, setContent] = useState("");
   const { user } = useUser();
 
@@ -318,13 +312,10 @@ export default function Editor() {
   });
 
   return (
-    <div className="">
-      <div>
-        <MenuBar editor={editor} />
-        <EditorContent
-          editor={editor}
-          className="overflow-y-auto"
-        />
+    <div className="h-full flex flex-col">
+      <MenuBar editor={editor} fileId={fileId} />
+      <div className="flex-1 overflow-y-auto">
+        <EditorContent editor={editor} />
       </div>
     </div>
   );
