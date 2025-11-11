@@ -70,10 +70,12 @@ const MenuBar = ({ editor, fileId }) => {
     toast.info("✨ AI is thinking... please wait");
     try {
       const queryResult = JSON.parse(
-        await vectorSearchQuery({ query: text, fileId: fileId.id })
+        await vectorSearchQuery({ query: text, fileId: fileId })
       );
 
-      const response = await aiAssist(text, queryResult[0]?.pageContent || "");
+      // console.log("Vector Search Result:", queryResult.context);
+
+      const response = await aiAssist(text, queryResult.context || "");
 
       const cleanResponse = response.replace(/```/g, "").trim();
 

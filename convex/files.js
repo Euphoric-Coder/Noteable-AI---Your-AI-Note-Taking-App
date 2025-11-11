@@ -125,3 +125,15 @@ export const deleteFile = mutation({
     return { success: true, deletedEmbeddings: relatedDocs.length };
   },
 });
+
+
+export const getFileChunks = query({
+  args: { fileId: v.string() },
+  handler: async (ctx, args) => {
+    const chunks = await ctx.db
+      .query("documents")
+      .filter((q) => q.eq(q.field("metadata.fileId"), args.fileId))
+      .collect();
+    return chunks;
+  },
+});
