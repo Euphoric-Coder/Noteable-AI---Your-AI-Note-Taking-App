@@ -48,7 +48,7 @@ export default function WorkspaceDetail() {
   const [isEditing, setIsEditing] = useState(false);
   const [selectedPDFId, setSelectedPDFId] = useState(null);
 
-  // 🧠 Fetch workspace and related PDF files
+  // Fetch workspace and related PDF files
   const data = useQuery(api.workspace.fetchWorkspaceById, { workspaceId: id });
   const workspace = data?.workspace;
   const pdfFiles = data?.files || [];
@@ -101,7 +101,7 @@ export default function WorkspaceDetail() {
       >
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 sm:px-6 py-3 sm:py-4 gap-3 sm:gap-0">
           {/* Back Button and Workspace Name */}
-          <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto">
+          <div className="flex items-center justify-between space-x-2 sm:space-x-4 w-full sm:w-auto">
             <Button variant="ghost" size="sm" asChild>
               <Link
                 href={"/dashboard/workspace"}
@@ -116,45 +116,45 @@ export default function WorkspaceDetail() {
                 <span className="sm:hidden">Back</span>
               </Link>
             </Button>
+          </div>
 
-            <div className="flex items-center space-x-1 sm:space-x-2 flex-1 sm:flex-none">
-              {isEditing ? (
-                <input
-                  type="text"
-                  value={workspace.name}
-                  onChange={() => {}}
-                  className={`text-lg sm:text-xl font-semibold bg-transparent border-b-2 border-red-400 focus:outline-none w-full sm:w-auto ${
-                    darkMode ? "text-white" : "text-gray-900"
-                  }`}
-                  onBlur={() => setIsEditing(false)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") setIsEditing(false);
-                  }}
-                  autoFocus
-                />
-              ) : (
-                <h1
-                  className={`text-lg sm:text-xl font-semibold cursor-pointer hover:text-red-400 transition-colors truncate ${
-                    darkMode ? "text-white" : "text-gray-900"
-                  }`}
-                  onClick={() => setIsEditing(true)}
-                >
-                  {workspace.name}
-                </h1>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
+          <div className="flex items-center space-x-1 sm:space-x-2 flex-1 sm:flex-none">
+            {isEditing ? (
+              <input
+                type="text"
+                value={workspace.name}
+                onChange={() => {}}
+                className={`text-lg sm:text-xl font-semibold bg-transparent border-b-2 border-red-400 focus:outline-none w-full sm:w-auto ${
+                  darkMode ? "text-white" : "text-gray-900"
+                }`}
+                onBlur={() => setIsEditing(false)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") setIsEditing(false);
+                }}
+                autoFocus
+              />
+            ) : (
+              <h1
+                className={`text-lg sm:text-xl font-semibold cursor-pointer hover:text-red-400 transition-colors truncate ${
+                  darkMode ? "text-white" : "text-gray-900"
+                }`}
                 onClick={() => setIsEditing(true)}
-                className={
-                  darkMode
-                    ? "text-gray-400 hover:text-white"
-                    : "text-gray-500 hover:text-gray-900"
-                }
               >
-                <Edit3 className="h-4 w-4" />
-              </Button>
-            </div>
+                {workspace.name}
+              </h1>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsEditing(true)}
+              className={
+                darkMode
+                  ? "text-gray-400 hover:text-white"
+                  : "text-gray-500 hover:text-gray-900"
+              }
+            >
+              <Edit3 className="h-4 w-4" />
+            </Button>
           </div>
 
           {/* Right controls */}
@@ -192,9 +192,9 @@ export default function WorkspaceDetail() {
       </div>
 
       {/* ─────────────── Main Content ─────────────── */}
-      <div className="flex flex-col lg:flex-row h-screen overflow-hidden">
+      <div className="flex flex-col lg:flex-row h-screen overflow-auto">
         {/* Left Panel – Editor */}
-        <div className="w-full lg:w-1/2 flex flex-col border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-gray-700 h-[50vh] lg:h-full overflow-hidden">
+        <div className="w-full lg:w-1/2 flex flex-col border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-gray-700 h-[50vh] lg:h-full overflow-auto">
           <div className="flex-1 overflow-auto">
             <Editor fileId={selectedPDFId || pdfFiles[0]?.fileId} />
           </div>
@@ -204,7 +204,7 @@ export default function WorkspaceDetail() {
         <div
           className={`w-full lg:w-1/2 flex flex-col ${
             darkMode ? "bg-gray-800" : "bg-gray-50"
-          } h-[50vh] lg:h-full overflow-hidden`}
+          } h-[50vh] lg:h-full overflow-auto`}
         >
           {/* PDF Header */}
           <div
@@ -214,105 +214,98 @@ export default function WorkspaceDetail() {
                 : "border-gray-200 bg-gray-50"
             } px-3 sm:px-4 py-2 flex-shrink-0`}
           >
-            <div className="space-y-3">
-              {/* Top row */}
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
-                <div className="flex items-center space-x-2">
-                  <Badge variant="outline" className="text-xs">
-                    PDF Viewer
-                  </Badge>
-                  <Badge variant="secondary" className="text-xs">
-                    {pdfFiles.length} files
-                  </Badge>
-                </div>
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 w-full">
+              {/* LEFT: PDF Viewer + File Count */}
+              <div className="flex items-center space-x-2 w-full sm:w-auto justify-start">
+                <Badge variant="outline" className="text-xs">
+                  PDF Viewer
+                </Badge>
+                <Badge variant="secondary" className="text-xs">
+                  {pdfFiles.length} files
+                </Badge>
               </div>
 
-              {/* PDF Selector */}
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full">
-                <div className="flex-1 min-w-0">
-                  <Select
-                    value={selectedPDFId || pdfFiles[0]?.fileId}
-                    onValueChange={setSelectedPDFId}
-                  >
-                    <SelectTrigger className="w-full sm:w-[280px] md:w-[320px]">
-                      <div className="flex items-center space-x-2 min-w-0">
-                        <FileText className="h-4 w-4 text-red-600 flex-shrink-0" />
-                        <div className="min-w-0 flex-1 truncate">
-                          <SelectValue placeholder="Select a PDF..." />
-                        </div>
-                      </div>
-                    </SelectTrigger>
-                    <SelectContent className="max-h-60 overflow-y-auto">
-                      {pdfFiles.map((pdf) => (
-                        <SelectItem key={pdf.fileId} value={pdf.fileId}>
-                          <div className="flex items-center space-x-2">
-                            <FileText className="h-4 w-4 text-red-600" />
-                            <div>
-                              <p className="font-medium truncate max-w-[200px]">
-                                {pdf.fileName}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {new Date(
-                                  pdf._creationTime
-                                ).toLocaleDateString()}
-                              </p>
-                            </div>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* PDF Navigation */}
-                {pdfFiles.length > 1 && (
-                  <div className="flex items-center space-x-1">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handlePreviousPDF}
-                      className="p-2"
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <span
-                      className={`text-xs px-2 ${
-                        darkMode ? "text-gray-400" : "text-gray-600"
-                      }`}
-                    >
-                      {pdfFiles.findIndex(
-                        (pdf) => pdf.fileId === selectedPDFId
-                      ) + 1}{" "}
-                      of {pdfFiles.length}
-                    </span>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleNextPDF}
-                      className="p-2"
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )}
-              </div>
-
-              {/* Current PDF Info */}
-              {selectedPDF && (
-                <div
-                  className={`text-xs ${
-                    darkMode ? "text-gray-400" : "text-gray-600"
-                  } truncate`}
+              {/* CENTER: PDF Selector */}
+              <div className="flex-1 w-full flex justify-center order-last sm:order-none">
+                <Select
+                  value={selectedPDFId || pdfFiles[0]?.fileId}
+                  onValueChange={setSelectedPDFId}
                 >
-                  <span className="font-medium">{selectedPDF.fileName}</span>
-                  <span className="mx-2">•</span>
-                  <span>
-                    Uploaded{" "}
-                    {format(new Date(selectedPDF._creationTime), "dd/MM/yyyy")}
+                  <SelectTrigger className="w-full sm:w-[280px] md:w-[320px]">
+                    <div className="flex items-center space-x-2 min-w-0">
+                      <FileText className="h-4 w-4 text-red-600 flex-shrink-0" />
+                      <div className="min-w-0 flex-1 truncate">
+                        <SelectValue placeholder="Select a PDF..." />
+                      </div>
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent className="max-h-60 overflow-y-auto">
+                    {pdfFiles.map((pdf) => (
+                      <SelectItem key={pdf.fileId} value={pdf.fileId}>
+                        <div className="flex items-center space-x-2">
+                          <FileText className="h-4 w-4 text-red-600" />
+                          <div>
+                            <p className="font-medium truncate max-w-[200px]">
+                              {pdf.fileName}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {new Date(pdf._creationTime).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* RIGHT: Navigation Buttons */}
+              {pdfFiles.length > 1 && (
+                <div className="flex items-center justify-end space-x-1 w-full sm:w-auto">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handlePreviousPDF}
+                    className="p-2"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <span
+                    className={`text-xs px-2 ${
+                      darkMode ? "text-gray-400" : "text-gray-600"
+                    }`}
+                  >
+                    {pdfFiles.findIndex((pdf) => pdf.fileId === selectedPDFId) +
+                      1}{" "}
+                    of {pdfFiles.length}
                   </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleNextPDF}
+                    className="p-2"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
                 </div>
               )}
             </div>
+
+            {/* CURRENT PDF INFO */}
+            {selectedPDF && (
+              <div
+                className={`text-xs mt-2 text-center sm:text-left ${
+                  darkMode ? "text-gray-400" : "text-gray-600"
+                } truncate`}
+              >
+                <span className="font-medium">{selectedPDF.fileName}</span>
+                <span className="mx-2">•</span>
+                <span>
+                  Uploaded{" "}
+                  {format(new Date(selectedPDF._creationTime), "dd/MM/yyyy")}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* PDF Viewer */}
