@@ -73,14 +73,12 @@ const MenuBar = ({ editor, fileId }) => {
         await vectorSearchQuery({ query: text, fileId: fileId })
       );
 
-      // console.log("Vector Search Result:", queryResult.context);
-
       const response = await aiAssist(text, queryResult.context || "");
 
       const cleanResponse = response.replace(/```/g, "").trim();
 
       if (!cleanResponse || cleanResponse === `""`) {
-        toast.error("No meaningful AI response. Try rephrasing your query.");
+        // toast.error("No meaningful AI response. Try rephrasing your query.");
         return;
       }
 

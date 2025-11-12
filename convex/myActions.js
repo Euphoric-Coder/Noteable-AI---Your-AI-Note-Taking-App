@@ -1,19 +1,9 @@
 import { ConvexVectorStore } from "@langchain/community/vectorstores/convex";
-import { action, internalQuery } from "./_generated/server.js";
+import { action } from "./_generated/server.js";
 import { api } from "./_generated/api.js";
 import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 import { TaskType } from "@google/generative-ai";
 import { v } from "convex/values";
-
-// Define an internal query that performs the actual database access
-export const pdfCount = internalQuery({
-  handler: async (ctx) => {
-    // Here you can use ctx.db to query the database
-    const fileCount = await ctx.db.query("pdfFiles").count();
-
-    return fileCount;
-  },
-});
 
 export const ingest = action({
   args: {
@@ -71,11 +61,7 @@ export const search = action({
       fileId: args.fileId,
     });
 
-    console.log(`📄 Total Chunks in DB: ${allChunks.length}`);
-    console.log(`📁 Chunks for FileID ${args.fileId}: ${fileChunks.length}`);
-
     if (!fileChunks || fileChunks.length === 0) {
-      console.warn(`⚠️ No chunks found for fileId: ${args.fileId}`);
       return JSON.stringify({
         fileId: args.fileId,
         context: "",
@@ -90,18 +76,10 @@ export const search = action({
       allChunks.length
     );
 
-    console.log(searchResults);
-
-    console.log(
-      `🔍 Search for "${args.query}" → ${searchResults.length} total matches`
-    );
-
     // Filter for this fileId
     const relevant = searchResults.filter(
       ([doc, score]) => doc.metadata?.fileId === args.fileId && score > 0.51
     );
-
-    console.log(`🎯 Relevant Chunks Found: ${relevant.length}`);
 
     // If no relevant chunks, fall back to all chunks of this file
     const finalChunks = relevant.length
@@ -121,12 +99,6 @@ export const search = action({
     const combinedText = ranked.map((r) => r.text.trim()).join("\n\n");
     const safeText =
       combinedText.length > 40000 ? combinedText.slice(0, 40000) : combinedText;
-
-    console.log("Ranked Chunks:", ranked);
-
-    console.log(
-      `🧩 RAG context built for fileId ${args.fileId} | ${ranked.length} chunks | ${safeText.length} chars`
-    );
 
     return JSON.stringify({
       fileId: args.fileId,
