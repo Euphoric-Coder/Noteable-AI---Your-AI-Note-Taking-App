@@ -1,9 +1,9 @@
 import { ConvexVectorStore } from "@langchain/community/vectorstores/convex";
 import { action, internalQuery } from "./_generated/server.js";
-import { api, internal } from "./_generated/api.js";
+import { api } from "./_generated/api.js";
 import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 import { TaskType } from "@google/generative-ai";
-import { jsonToConvex, v } from "convex/values";
+import { v } from "convex/values";
 
 // Define an internal query that performs the actual database access
 export const pdfCount = internalQuery({
@@ -63,12 +63,18 @@ export const search = action({
       { ctx }
     );
 
-    // ✅ FIX: Fetch file chunks through runQuery
-    const allChunks = await ctx.runQuery(api.files.getFileChunks, {
+    // Fetch all chunks (for global search context)
+    const allChunks = await ctx.runQuery(api.files.getAllChunks);
+
+    // Fetch chunks belonging to this fileId
+    const fileChunks = await ctx.runQuery(api.files.getFileChunks, {
       fileId: args.fileId,
     });
 
-    if (!allChunks || allChunks.length === 0) {
+    console.log(`📄 Total Chunks in DB: ${allChunks.length}`);
+    console.log(`📁 Chunks for FileID ${args.fileId}: ${fileChunks.length}`);
+
+    if (!fileChunks || fileChunks.length === 0) {
       console.warn(`⚠️ No chunks found for fileId: ${args.fileId}`);
       return JSON.stringify({
         fileId: args.fileId,
@@ -78,41 +84,49 @@ export const search = action({
       });
     }
 
-    // Perform similarity search
-    const searchResults = await vectorStore.similaritySearch(
+    // Perform semantic similarity search across ALL chunks
+    const searchResults = await vectorStore.similaritySearchWithScore(
       args.query,
       allChunks.length
     );
 
+    console.log(searchResults);
+
     console.log(
-      `🔍 Search for "${args.query}" | Found ${searchResults.length} chunks out of ${allChunks.length} total chunks for fileId ${args.fileId}`
+      `🔍 Search for "${args.query}" → ${searchResults.length} total matches`
     );
 
+    // Filter for this fileId
     const relevant = searchResults.filter(
-      (r) => r.metadata?.fileId === args.fileId
+      ([doc, score]) => doc.metadata?.fileId === args.fileId && score > 0.51
     );
 
-    console.log("Relevant Chunks:", relevant);
+    console.log(`🎯 Relevant Chunks Found: ${relevant.length}`);
 
-    const finalChunks = relevant.length ? relevant : allChunks;
+    // If no relevant chunks, fall back to all chunks of this file
+    const finalChunks = relevant.length
+      ? relevant
+      : fileChunks.map((c) => [c, 0]);
 
+    // Rank and map into a uniform structure
     const ranked = finalChunks
-      .map((chunk) => ({
-        text: chunk.pageContent || chunk.text || "",
-        score: chunk.score ?? 0,
-        fileId: chunk.metadata?.fileId || args.fileId,
+      .map(([doc, score]) => ({
+        text: doc.pageContent || doc.text || "",
+        score: score ?? 0,
+        fileId: doc.metadata?.fileId || args.fileId,
       }))
       .sort((a, b) => b.score - a.score);
 
+    // Combine top chunks into a single context string
     const combinedText = ranked.map((r) => r.text.trim()).join("\n\n");
     const safeText =
-      combinedText.length > 30000 ? combinedText.slice(0, 30000) : combinedText;
+      combinedText.length > 40000 ? combinedText.slice(0, 40000) : combinedText;
+
+    console.log("Ranked Chunks:", ranked);
 
     console.log(
-      `Built RAG context for fileId ${args.fileId} | Chunks: ${ranked.length} | Length: ${safeText.length} chars`
+      `🧩 RAG context built for fileId ${args.fileId} | ${ranked.length} chunks | ${safeText.length} chars`
     );
-
-    console.log(safeText);
 
     return JSON.stringify({
       fileId: args.fileId,

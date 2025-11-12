@@ -126,7 +126,6 @@ export const deleteFile = mutation({
   },
 });
 
-
 export const getFileChunks = query({
   args: { fileId: v.string() },
   handler: async (ctx, args) => {
@@ -134,6 +133,13 @@ export const getFileChunks = query({
       .query("documents")
       .filter((q) => q.eq(q.field("metadata.fileId"), args.fileId))
       .collect();
+    return chunks;
+  },
+});
+
+export const getAllChunks = query({
+  handler: async (ctx) => {
+    const chunks = await ctx.db.query("documents").collect();
     return chunks;
   },
 });

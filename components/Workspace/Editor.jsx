@@ -67,7 +67,7 @@ const MenuBar = ({ editor, fileId }) => {
       return;
     }
 
-    toast.info("✨ AI is thinking... please wait");
+    toast.info("AI is thinking... please wait");
     try {
       const queryResult = JSON.parse(
         await vectorSearchQuery({ query: text, fileId: fileId })
