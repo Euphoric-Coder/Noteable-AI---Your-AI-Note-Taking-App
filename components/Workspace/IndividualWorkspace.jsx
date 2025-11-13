@@ -192,9 +192,9 @@ export default function WorkspaceDetail() {
       </div>
 
       {/* ─────────────── Main Content ─────────────── */}
-      <div className="flex flex-col lg:flex-row h-screen overflow-auto">
+      <div className="flex flex-col xl:flex-row h-screen overflow-auto">
         {/* Left Panel – Editor */}
-        <div className="w-full lg:w-1/2 flex flex-col border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-gray-700 h-[50vh] lg:h-full overflow-auto">
+        <div className="w-full xl:w-1/2 flex flex-col border-b xl:border-b-0 xl:border-r border-gray-200 dark:border-gray-700 h-[50vh] xl:h-full overflow-auto">
           <div className="flex-1 overflow-auto">
             <Editor fileId={selectedPDFId || pdfFiles[0]?.fileId} />
           </div>
@@ -202,9 +202,9 @@ export default function WorkspaceDetail() {
 
         {/* Right Panel – PDF Viewer */}
         <div
-          className={`w-full lg:w-1/2 flex flex-col ${
+          className={`w-full xl:w-1/2 flex flex-col ${
             darkMode ? "bg-gray-800" : "bg-gray-50"
-          } h-[50vh] lg:h-full overflow-auto`}
+          } h-[50vh] xl:h-full overflow-auto`}
         >
           {/* PDF Header */}
           <div

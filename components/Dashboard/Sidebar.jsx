@@ -25,6 +25,7 @@ import {
   PanelLeftOpen,
 } from "lucide-react";
 import Image from "next/image";
+import { UserButtonMenu } from "../UserButton";
 
 export default function Sidebar({ isCollapsed, onToggle }) {
   const pathname = usePathname();
@@ -232,10 +233,11 @@ export default function Sidebar({ isCollapsed, onToggle }) {
             isCollapsed ? "justify-center" : "space-x-3"
           }`}
         >
-          <Avatar className="h-8 w-8">
+          {/* <Avatar className="h-8 w-8">
             <AvatarImage src="https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2" />
             <AvatarFallback>JD</AvatarFallback>
-          </Avatar>
+          </Avatar> */}
+          <UserButtonMenu />
 
           {!isCollapsed && (
             <>
