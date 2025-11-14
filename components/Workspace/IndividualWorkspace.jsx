@@ -97,7 +97,7 @@ export default function WorkspaceDetail() {
       <div
         className={`border-b ${
           darkMode ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-white"
-        } sticky top-0 z-[60] md:h-[64px]`}
+        } sticky top-0 z-20 md:h-[64px]`}
       >
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 sm:px-6 py-3 sm:py-4 gap-3 sm:gap-0">
           {/* Back Button and Workspace Name */}
@@ -118,7 +118,7 @@ export default function WorkspaceDetail() {
             </Button>
           </div>
 
-          <div className="flex items-center space-x-1 sm:space-x-2 flex-1 sm:flex-none">
+          <div className="flex items-center justify-center sm:justify-start w-full sm:w-auto text-center space-x-1 sm:space-x-2">
             {isEditing ? (
               <input
                 type="text"
@@ -311,7 +311,9 @@ export default function WorkspaceDetail() {
           {/* PDF Viewer */}
           <div className="flex-1 overflow-auto p-2 sm:p-4">
             {selectedPDF ? (
-              <PDFViewer fileURL={selectedPDF.fileURL} />
+              <div className="h-full">
+                <PDFViewer fileURL={selectedPDF.fileURL} />
+              </div>
             ) : (
               <div className="h-full flex items-center justify-center text-gray-400 text-sm">
                 No PDF selected.

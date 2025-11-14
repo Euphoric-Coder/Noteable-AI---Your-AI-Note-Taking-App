@@ -118,7 +118,7 @@ const MenuBar = ({ editor, fileId }) => {
     }`;
 
   return (
-    <div className="sticky top-0 flex flex-wrap items-center justify-between rounded-tr-2xl rounded-tl-2xl gap-2 border-r border-l border-2 border-gray-300 p-4 backdrop-blur-md bg-white/60 dark:bg-slate-900/60">
+    <div className="sticky top-0 flex flex-wrap items-center justify-between gap-2 border-r border-l border-2 border-gray-300 p-4 backdrop-blur-md bg-white/60 dark:bg-slate-900/60">
       <div className="flex items-center">
         {/* Headings */}
         {[1, 2, 3].map((level) => (
@@ -303,7 +303,7 @@ export default function Editor({ fileId }) {
     editorProps: {
       attributes: {
         class:
-          "prose dark:prose-invert max-w-none p-4 min-h-screen rounded-3xl border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 outline-none",
+          "prose dark:prose-invert max-w-none p-4 min-h-screen border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 outline-none",
       },
     },
     onUpdate: ({ editor }) => {
