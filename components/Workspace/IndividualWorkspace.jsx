@@ -97,7 +97,7 @@ export default function WorkspaceDetail() {
       <div
         className={`border-b ${
           darkMode ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-white"
-        } sticky top-0 z-[60] h-[64px]`}
+        } sticky top-0 z-[60] md:h-[64px]`}
       >
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 sm:px-6 py-3 sm:py-4 gap-3 sm:gap-0">
           {/* Back Button and Workspace Name */}
