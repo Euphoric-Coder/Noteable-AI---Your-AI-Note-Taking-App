@@ -97,7 +97,7 @@ export default function WorkspaceDetail() {
       <div
         className={`border-b ${
           darkMode ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-white"
-        } sticky top-0 z-10`}
+        } sticky top-0 z-[60] h-[64px]`}
       >
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 sm:px-6 py-3 sm:py-4 gap-3 sm:gap-0">
           {/* Back Button and Workspace Name */}
@@ -194,8 +194,8 @@ export default function WorkspaceDetail() {
       {/* ─────────────── Main Content ─────────────── */}
       <div className="flex flex-col xl:flex-row h-screen overflow-auto">
         {/* Left Panel – Editor */}
-        <div className="w-full xl:w-1/2 flex flex-col border-b xl:border-b-0 xl:border-r border-gray-200 dark:border-gray-700 h-[50vh] xl:h-full overflow-auto">
-          <div className="flex-1 overflow-auto">
+        <div className="w-full xl:w-1/2 flex flex-col border-b xl:border-b-0 xl:border-r border-gray-200 dark:border-gray-700 h-[50vh] xl:h-full overflow-hidden">
+          <div className="flex-1 overflow-hidden">
             <Editor fileId={selectedPDFId || pdfFiles[0]?.fileId} />
           </div>
         </div>
