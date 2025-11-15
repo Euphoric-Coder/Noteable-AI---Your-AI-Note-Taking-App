@@ -35,11 +35,11 @@ import {
 } from "react-icons/md";
 import { useUser } from "@clerk/nextjs";
 import { Sparkles, Trash } from "lucide-react";
-import { useAction } from "convex/react";
+import { useAction, useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { aiAssist } from "@/lib/aiAssist";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const MenuBar = ({ editor, fileId }) => {
   const vectorSearchQuery = useAction(api.myActions.search);
@@ -51,7 +51,7 @@ const MenuBar = ({ editor, fileId }) => {
 
   if (!editor) return null;
 
-  // 🔗 Insert link
+  // Insert link
   const insertLink = () => {
     if (url) {
       editor.chain().focus().setLink({ href: url }).run();
@@ -60,7 +60,7 @@ const MenuBar = ({ editor, fileId }) => {
     }
   };
 
-  // 🤖 Run AI Search and Insert Suggestion
+  // Run AI Search and Insert Suggestion
   const runAiSuggestion = async (text) => {
     if (!text.trim()) {
       toast.error("Please enter some text for AI suggestion.");
@@ -92,7 +92,7 @@ const MenuBar = ({ editor, fileId }) => {
     }
   };
 
-  // ✨ Handle Sparkles Button Click
+  // Handle Sparkles Button Click
   const handleAiSuggest = () => {
     const { view, state } = editor;
     const { from, to } = view.state.selection;
@@ -286,9 +286,22 @@ const MenuBar = ({ editor, fileId }) => {
   );
 };
 
-export default function Editor({ fileId }) {
+export default function Editor({ fileId, workspaceId }) {
   const [content, setContent] = useState("");
   const { user } = useUser();
+
+  const updateWorkspaceContent = useMutation(
+    api.workspace.updateWorkspaceContent
+  );
+
+  const workspace = useQuery(api.workspace.fetchWorkspaceById, {
+    workspaceId: workspaceId,
+  });
+
+  // On Content Change, UseEffect
+  useEffect(() => {
+    console.log("Editor Content Updated:", content);
+  }, [content]);
 
   const editor = useEditor({
     extensions: [
@@ -300,6 +313,7 @@ export default function Editor({ fileId }) {
       Link,
       Image,
     ],
+    immediatelyRender: false,
     editorProps: {
       attributes: {
         class:
@@ -310,6 +324,34 @@ export default function Editor({ fileId }) {
       setContent(editor.getHTML());
     },
   });
+
+  // Load existing content
+  useEffect(() => {
+    if (workspace?.workspace?.content && editor) {
+      editor.commands.setContent(workspace.workspace.content);
+    }
+  }, [workspace, editor]);
+
+  // Auto-save (debounced)
+  useEffect(() => {
+    if (!workspaceId || !content) return;
+
+    const timer = setTimeout(async () => {
+      try {
+        await updateWorkspaceContent({
+          workspaceId: workspaceId,
+          content,
+        });
+        console.log("Workspace content synced");
+        toast.success("Content auto-saved");
+      } catch (error) {
+        console.error("Failed to save content:", error);
+        toast.error("Failed to auto-save content");
+      }
+    }, 1500); // debounce 1.5s
+
+    return () => clearTimeout(timer);
+  }, [content, fileId]);
 
   return (
     <div className="h-full flex flex-col">

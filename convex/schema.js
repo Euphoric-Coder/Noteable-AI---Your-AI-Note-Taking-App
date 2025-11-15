@@ -20,13 +20,14 @@ export default defineSchema({
     workspaceId: v.string(),
     name: v.string(),
     description: v.optional(v.string()),
+    content: v.optional(v.string()),
     createdBy: v.string(),
     fileIds: v.optional(v.array(v.string())), // links to pdfFiles.fileId
     fileCount: v.optional(v.number()),
     status: v.string(), // e.g., "active", "archived"
     createdAt: v.optional(v.number()),
     updatedAt: v.optional(v.number()),
-  }),
+  }).index("by_workspaceId", ["workspaceId"]),
 
   documents: defineTable({
     text: v.string(),

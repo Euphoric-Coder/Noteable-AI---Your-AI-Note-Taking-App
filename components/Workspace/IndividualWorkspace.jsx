@@ -7,7 +7,6 @@ import { api } from "@/convex/_generated/api";
 
 import { Button } from "@/components/ui/button";
 import PDFViewer from "@/components/Workspace/PDFViewer";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -30,17 +29,9 @@ import {
   ChevronRight,
   FileText,
 } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import { format } from "date-fns";
 import Editor from "./Editor";
-import { toast } from "sonner";
 
 export default function WorkspaceDetail() {
   const { id } = useParams(); // workspaceId from URL
@@ -196,7 +187,7 @@ export default function WorkspaceDetail() {
         {/* Left Panel – Editor */}
         <div className="w-full xl:w-1/2 flex flex-col border-b xl:border-b-0 xl:border-r border-gray-200 dark:border-gray-700 h-[50vh] xl:h-full overflow-hidden">
           <div className="flex-1 overflow-hidden">
-            <Editor fileId={selectedPDFId || pdfFiles[0]?.fileId} />
+            <Editor fileId={selectedPDFId || pdfFiles[0]?.fileId} workspaceId={id}/>
           </div>
         </div>
 

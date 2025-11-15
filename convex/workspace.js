@@ -107,6 +107,34 @@ export const fetchWorkspaceById = query({
   },
 });
 
+export const updateWorkspaceContent = mutation({
+  args: {
+    workspaceId: v.string(),
+    content: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+
+    // find the workspace
+    const workspace = await ctx.db
+      .query("workspaces")
+      .withIndex("by_workspaceId", (q) => q.eq("workspaceId", args.workspaceId))
+      .unique();
+
+    if (!workspace) {
+      throw new Error("Workspace not found");
+    }
+
+    // update only content + updatedAt
+    await ctx.db.patch(workspace._id, {
+      content: args.content,
+      updatedAt: now,
+    });
+
+    return { success: true };
+  },
+});
+
 /* ---------- DELETE WORKSPACE ---------- */
 export const deleteWorkspace = mutation({
   args: { workspaceId: v.string() },
