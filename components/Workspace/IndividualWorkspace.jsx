@@ -28,6 +28,8 @@ import {
   ChevronLeft,
   ChevronRight,
   FileText,
+  CheckCircle,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
@@ -38,6 +40,8 @@ export default function WorkspaceDetail() {
   const [darkMode, setDarkMode] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedPDFId, setSelectedPDFId] = useState(null);
+  // // states: "idle" | "saving" | "saved" | "error"
+  const [syncingState, setSyncingState] = useState("idle");
 
   // Fetch workspace and related PDF files
   const data = useQuery(api.workspace.fetchWorkspaceById, { workspaceId: id });
@@ -173,10 +177,29 @@ export default function WorkspaceDetail() {
             <Button
               variant="outline"
               size="sm"
-              className="border-red-400 text-red-400 hover:bg-red-50"
+              disabled={syncingState === "saving"}
+              className={`border-red-400 text-red-400 hover:bg-red-50 flex items-center gap-2 ${
+                syncingState === "saving" ? "opacity-70" : ""
+              } ${syncingState === "saved" ? "border-green-500 text-green-500 hover:bg-green-50" : ""}`}
             >
-              <Save className="h-4 w-4 sm:mr-2" />
-              <span className="hidden sm:inline">Save</span>
+              {syncingState === "saving" ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Syncing Data...</span>
+                </>
+              ) : syncingState === "saved" ? (
+                <>
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  <span>Synced</span>
+                </>
+              ) : syncingState === "error" ? (
+                <span className="text-red-500">Error</span>
+              ) : (
+                <>
+                  <Save className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Save</span>
+                </>
+              )}
             </Button>
           </div>
         </div>
@@ -187,7 +210,11 @@ export default function WorkspaceDetail() {
         {/* Left Panel – Editor */}
         <div className="w-full xl:w-1/2 flex flex-col border-b xl:border-b-0 xl:border-r border-gray-200 dark:border-gray-700 h-[50vh] xl:h-full overflow-hidden">
           <div className="flex-1 overflow-hidden">
-            <Editor fileId={selectedPDFId || pdfFiles[0]?.fileId} workspaceId={id}/>
+            <Editor
+              fileId={selectedPDFId || pdfFiles[0]?.fileId}
+              workspaceId={id}
+              setSyncingState={setSyncingState}
+            />
           </div>
         </div>
 

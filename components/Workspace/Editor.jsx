@@ -41,7 +41,7 @@ import { aiAssist } from "@/lib/aiAssist";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 
-const MenuBar = ({ editor, fileId }) => {
+const MenuBar = ({ editor, fileId, setSyncingState }) => {
   const vectorSearchQuery = useAction(api.myActions.search);
   const [linkDialog, setLinkDialog] = useState(false);
   const [aiSuggestDialog, setAiSuggestDialog] = useState(false);
@@ -286,7 +286,7 @@ const MenuBar = ({ editor, fileId }) => {
   );
 };
 
-export default function Editor({ fileId, workspaceId }) {
+export default function Editor({ fileId, workspaceId, setSyncingState }) {
   const [content, setContent] = useState("");
   const { user } = useUser();
 
@@ -332,26 +332,29 @@ export default function Editor({ fileId, workspaceId }) {
     }
   }, [workspace, editor]);
 
-  // Auto-save (debounced)
+  // Auto-save with syncing state
   useEffect(() => {
     if (!workspaceId || !content) return;
 
     const timer = setTimeout(async () => {
       try {
+        setSyncingState("saving");
         await updateWorkspaceContent({
-          workspaceId: workspaceId,
+          workspaceId,
           content,
         });
-        console.log("Workspace content synced");
-        toast.success("Content auto-saved");
+        setSyncingState("saved");
+
+        // revert to idle after 2 seconds
+        setTimeout(() => setSyncingState("idle"), 2000);
       } catch (error) {
         console.error("Failed to save content:", error);
-        toast.error("Failed to auto-save content");
+        setSyncingState("error");
       }
     }, 1500); // debounce 1.5s
 
     return () => clearTimeout(timer);
-  }, [content, fileId]);
+  }, [content, workspaceId]);
 
   return (
     <div className="h-full flex flex-col">
