@@ -286,7 +286,13 @@ const MenuBar = ({ editor, fileId, setSyncingState }) => {
   );
 };
 
-export default function Editor({ fileId, workspaceId, setSyncingState }) {
+export default function Editor({
+  fileId,
+  workspaceId,
+  setSyncingState,
+  save,
+  setSave,
+}) {
   const [content, setContent] = useState("");
   const { user } = useUser();
 
@@ -297,11 +303,6 @@ export default function Editor({ fileId, workspaceId, setSyncingState }) {
   const workspace = useQuery(api.workspace.fetchWorkspaceById, {
     workspaceId: workspaceId,
   });
-
-  // On Content Change, UseEffect
-  useEffect(() => {
-    console.log("Editor Content Updated:", content);
-  }, [content]);
 
   const editor = useEditor({
     extensions: [
@@ -329,8 +330,21 @@ export default function Editor({ fileId, workspaceId, setSyncingState }) {
   useEffect(() => {
     if (workspace?.workspace?.content && editor) {
       editor.commands.setContent(workspace.workspace.content);
+      setContent(workspace.workspace.content);
     }
   }, [workspace, editor]);
+
+  // Handle saving
+  useEffect(() => {
+    if (save) {
+      // updateWorkspaceContent({
+      //   workspaceId,
+      //   content,
+      // });
+      console.log("Saving content:", content);
+      setSave(false);
+    }
+  }, [save]);
 
   // Auto-save with syncing state
   useEffect(() => {

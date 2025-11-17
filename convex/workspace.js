@@ -107,6 +107,29 @@ export const fetchWorkspaceById = query({
   },
 });
 
+export const renameWorkspace = mutation({
+  args: {
+    workspaceId: v.string(),
+    name: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const workspace = await ctx.db
+      .query("workspaces")
+      .filter((q) => q.eq(q.field("workspaceId"), args.workspaceId))
+      .first();
+
+    if (!workspace) throw new Error("Workspace not found");
+
+    await ctx.db.patch(workspace._id, {
+      name: args.name,
+      updatedAt: Date.now(),
+    });
+
+    return { success: true };
+  },
+});
+
+
 export const updateWorkspaceContent = mutation({
   args: {
     workspaceId: v.string(),

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useParams } from "next/navigation";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
 import { Button } from "@/components/ui/button";
@@ -48,6 +48,12 @@ export default function WorkspaceDetail() {
   const workspace = data?.workspace;
   const pdfFiles = data?.files || [];
 
+  const renameWorkspace = useMutation(api.workspace.renameWorkspace);
+  const [newName, setNewName] = useState(workspace?.name || "");
+  const [isRenaming, setIsRenaming] = useState(false);
+
+  const [save, setSave] = useState(false);
+
   // Handle loading and error states
   if (data === undefined)
     return (
@@ -64,6 +70,22 @@ export default function WorkspaceDetail() {
 
   const selectedPDF =
     pdfFiles.find((pdf) => pdf.fileId === selectedPDFId) || pdfFiles[0];
+
+  const handleRename = async () => {
+    if (!newName.trim() || newName === workspace.name) {
+      setIsEditing(false);
+      return;
+    }
+    try {
+      setIsRenaming(true);
+      await renameWorkspace({ workspaceId: id, name: newName.trim() });
+      setIsEditing(false);
+    } catch (err) {
+      console.error("Rename failed:", err);
+    } finally {
+      setIsRenaming(false);
+    }
+  };
 
   const handlePreviousPDF = () => {
     const currentIndex = pdfFiles.findIndex(
@@ -115,19 +137,25 @@ export default function WorkspaceDetail() {
 
           <div className="flex items-center justify-center sm:justify-start w-full sm:w-auto text-center space-x-1 sm:space-x-2">
             {isEditing ? (
-              <input
-                type="text"
-                value={workspace.name}
-                onChange={() => {}}
-                className={`text-lg sm:text-xl font-semibold bg-transparent border-b-2 border-red-400 focus:outline-none w-full sm:w-auto ${
-                  darkMode ? "text-white" : "text-gray-900"
-                }`}
-                onBlur={() => setIsEditing(false)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") setIsEditing(false);
-                }}
-                autoFocus
-              />
+              <div className="relative flex items-center">
+                <input
+                  type="text"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  onBlur={handleRename}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleRename();
+                    if (e.key === "Escape") setIsEditing(false);
+                  }}
+                  className={`text-lg sm:text-xl font-semibold bg-transparent border-b-2 border-red-400 focus:outline-none w-full sm:w-auto pr-6 ${
+                    darkMode ? "text-white" : "text-gray-900"
+                  }`}
+                  autoFocus
+                />
+                {isRenaming && (
+                  <Loader2 className="absolute right-1 h-4 w-4 text-gray-400 animate-spin" />
+                )}
+              </div>
             ) : (
               <h1
                 className={`text-lg sm:text-xl font-semibold cursor-pointer hover:text-red-400 transition-colors truncate ${
@@ -138,6 +166,7 @@ export default function WorkspaceDetail() {
                 {workspace.name}
               </h1>
             )}
+
             <Button
               variant="ghost"
               size="sm"
@@ -178,7 +207,8 @@ export default function WorkspaceDetail() {
               variant="outline"
               size="sm"
               disabled={syncingState === "saving"}
-              className={`border-red-400 text-red-400 hover:bg-red-50 flex items-center gap-2 ${
+              onClick={() => setSave(true)}
+              className={`border-red-400 text-red-400 hover:bg-red-50 hover:border-red-500 hover:text-red-400 flex items-center gap-2 ${
                 syncingState === "saving" ? "opacity-70" : ""
               } ${syncingState === "saved" ? "border-green-500 text-green-500 hover:bg-green-50" : ""}`}
             >
@@ -214,6 +244,8 @@ export default function WorkspaceDetail() {
               fileId={selectedPDFId || pdfFiles[0]?.fileId}
               workspaceId={id}
               setSyncingState={setSyncingState}
+              save={save}
+              setSave={setSave}
             />
           </div>
         </div>
