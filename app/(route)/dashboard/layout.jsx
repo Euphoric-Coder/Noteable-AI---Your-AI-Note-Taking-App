@@ -82,7 +82,7 @@ export default function DashboardLayout({ children }) {
             </div>
 
             {/* Theme Toggle */}
-            <div className="w-10">
+            <div>
               <ModeToggle />
             </div>
           </div>

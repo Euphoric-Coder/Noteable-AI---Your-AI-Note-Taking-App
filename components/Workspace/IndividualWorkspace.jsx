@@ -34,6 +34,7 @@ import {
 import Link from "next/link";
 import { format } from "date-fns";
 import Editor from "./Editor";
+import { ModeToggle } from "../ThemeButton";
 
 export default function WorkspaceDetail() {
   const { id } = useParams(); // workspaceId from URL
@@ -105,16 +106,12 @@ export default function WorkspaceDetail() {
   };
 
   return (
-    <div
-      className={`min-h-screen ${
-        darkMode ? "dark bg-gray-900 text-white" : "bg-white"
-      }`}
-    >
+    <div className={"min-h-screen dark:bg-gray-900 dark:text-white bg-white"}>
       {/* ─────────────── Top Navigation ─────────────── */}
       <div
-        className={`border-b ${
-          darkMode ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-white"
-        } sticky top-0 z-20 md:h-[64px]`}
+        className={
+          "border-b dark:border-gray-700 dark:bg-gray-800 border-gray-200 bg-white sticky top-0 z-20 md:h-[64px]"
+        }
       >
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 sm:px-6 py-3 sm:py-4 gap-3 sm:gap-0">
           {/* Back Button and Workspace Name */}
@@ -123,9 +120,7 @@ export default function WorkspaceDetail() {
               <Link
                 href={"/dashboard/workspace"}
                 className={
-                  darkMode
-                    ? "text-gray-300 hover:text-white"
-                    : "text-gray-600 hover:text-gray-900"
+                  "dark:text-gray-300 dark:hover:text-white text-gray-600 hover:text-gray-900"
                 }
               >
                 <ArrowLeft className="h-4 w-4 mr-1 sm:mr-2" />
@@ -140,16 +135,16 @@ export default function WorkspaceDetail() {
               <div className="relative flex items-center">
                 <input
                   type="text"
-                  value={newName}
+                  value={newName || workspace.name}
                   onChange={(e) => setNewName(e.target.value)}
                   onBlur={handleRename}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") handleRename();
                     if (e.key === "Escape") setIsEditing(false);
                   }}
-                  className={`text-lg sm:text-xl font-semibold bg-transparent border-b-2 border-red-400 focus:outline-none w-full sm:w-auto pr-6 ${
-                    darkMode ? "text-white" : "text-gray-900"
-                  }`}
+                  className={
+                    "text-lg sm:text-xl font-semibold bg-transparent border-b-2 border-red-400 focus:outline-none w-full sm:w-auto pr-6 dark:text-white text-gray-900"
+                  }
                   autoFocus
                 />
                 {isRenaming && (
@@ -158,9 +153,9 @@ export default function WorkspaceDetail() {
               </div>
             ) : (
               <h1
-                className={`text-lg sm:text-xl font-semibold cursor-pointer hover:text-red-400 transition-colors truncate ${
-                  darkMode ? "text-white" : "text-gray-900"
-                }`}
+                className={
+                  "text-lg sm:text-xl font-semibold cursor-pointer hover:text-red-400 transition-colors truncate dark:text-white text-gray-900"
+                }
                 onClick={() => setIsEditing(true)}
               >
                 {workspace.name}
@@ -172,9 +167,7 @@ export default function WorkspaceDetail() {
               size="sm"
               onClick={() => setIsEditing(true)}
               className={
-                darkMode
-                  ? "text-gray-400 hover:text-white"
-                  : "text-gray-500 hover:text-gray-900"
+                "dark:text-gray-400 dark:hover:text-white text-gray-500 hover:text-gray-900"
               }
             >
               <Edit3 className="h-4 w-4" />
@@ -184,23 +177,7 @@ export default function WorkspaceDetail() {
           {/* Right controls */}
           <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto justify-between sm:justify-end">
             {/* Dark Mode Toggle */}
-            <div className="flex items-center space-x-1 sm:space-x-2">
-              <Sun
-                className={`h-4 w-4 ${
-                  darkMode ? "text-gray-400" : "text-yellow-500"
-                }`}
-              />
-              <Switch
-                checked={darkMode}
-                onCheckedChange={setDarkMode}
-                className="data-[state=checked]:bg-red-400"
-              />
-              <Moon
-                className={`h-4 w-4 ${
-                  darkMode ? "text-blue-400" : "text-gray-400"
-                }`}
-              />
-            </div>
+            <ModeToggle />
 
             {/* Save Button */}
             <Button
@@ -252,25 +229,27 @@ export default function WorkspaceDetail() {
 
         {/* Right Panel – PDF Viewer */}
         <div
-          className={`w-full xl:w-1/2 flex flex-col ${
-            darkMode ? "bg-gray-800" : "bg-gray-50"
-          } h-[50vh] xl:h-full overflow-auto`}
+          className={
+            "-full xl:w-1/2 flex flex-col dark:bg-gray-800 bg-gray-50 h-[50vh] xl:h-full overflow-auto"
+          }
         >
           {/* PDF Header */}
           <div
-            className={`border-b ${
-              darkMode
-                ? "border-gray-700 bg-gray-800"
-                : "border-gray-200 bg-gray-50"
-            } px-3 sm:px-4 py-2 flex-shrink-0`}
+            className={`border-b dark:border-gray-700 dark:bg-gray-800 border-gray-200 bg-gray-50 px-3 sm:px-4 py-2 flex-shrink-0`}
           >
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 w-full">
               {/* LEFT: PDF Viewer + File Count */}
               <div className="flex items-center space-x-2 w-full sm:w-auto justify-start">
-                <Badge variant="outline" className="text-xs">
+                <Badge
+                  variant="outline"
+                  className="text-xs dark:text-gray-400 dark:border-gray-600 text-gray-600 border-gray-300"
+                >
                   PDF Viewer
                 </Badge>
-                <Badge variant="secondary" className="text-xs">
+                <Badge
+                  variant="secondary"
+                  className="text-xs dark:text-gray-400 dark:border-gray-600 text-gray-600 border-gray-300"
+                >
                   {pdfFiles.length} files
                 </Badge>
               </div>
@@ -281,7 +260,7 @@ export default function WorkspaceDetail() {
                   value={selectedPDFId || pdfFiles[0]?.fileId}
                   onValueChange={setSelectedPDFId}
                 >
-                  <SelectTrigger className="w-full sm:w-[280px] md:w-[320px]">
+                  <SelectTrigger className="w-full sm:w-[280px] md:w-[320px] dark:bg-gray-800 dark:border-gray-600">
                     <div className="flex items-center space-x-2 min-w-0">
                       <FileText className="h-4 w-4 text-red-600 flex-shrink-0" />
                       <div className="min-w-0 flex-1 truncate">
@@ -321,9 +300,7 @@ export default function WorkspaceDetail() {
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
                   <span
-                    className={`text-xs px-2 ${
-                      darkMode ? "text-gray-400" : "text-gray-600"
-                    }`}
+                    className={"text-xs px-2 dark:text-gray-400 text-gray-600"}
                   >
                     {pdfFiles.findIndex((pdf) => pdf.fileId === selectedPDFId) +
                       1}{" "}
@@ -344,9 +321,9 @@ export default function WorkspaceDetail() {
             {/* CURRENT PDF INFO */}
             {selectedPDF && (
               <div
-                className={`text-xs mt-2 text-center sm:text-left ${
-                  darkMode ? "text-gray-400" : "text-gray-600"
-                } truncate`}
+                className={
+                  "text-xs mt-2 text-center sm:text-left dark:text-gray-400 text-gray-600 truncate"
+                }
               >
                 <span className="font-medium">{selectedPDF.fileName}</span>
                 <span className="mx-2">•</span>
