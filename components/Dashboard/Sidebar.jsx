@@ -37,10 +37,10 @@ export default function Sidebar({ isCollapsed, onToggle }) {
     <div
       className={`${
         isCollapsed ? "w-24" : "w-64"
-      } h-screen bg-white border-r border-gray-200 flex flex-col transition-all duration-300 ease-in-out`}
+      } h-screen bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-all duration-300 ease-in-out`}
     >
       {/* ─── Logo + Toggle ─────────────────────────────────────── */}
-      <div className="flex items-center justify-between px-3 py-3 border-b border-gray-100">
+      <div className="flex items-center justify-between px-3 py-3 border-b border-gray-100 dark:border-gray-700">
         {/* Logo */}
         <Link
           href="/"
@@ -71,9 +71,9 @@ export default function Sidebar({ isCollapsed, onToggle }) {
             variant="ghost"
             size="sm"
             onClick={onToggle}
-            className="md:flex hidden h-8 w-8 rounded-lg hover:bg-gray-100 transition-all duration-200"
+            className="md:flex hidden h-8 w-8 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
           >
-            <PanelLeftClose className="h-4 w-4" />
+            <PanelLeftClose className="h-4 w-4 dark:text-gray-300 text-gray-700" />
           </Button>
         )}
       </div>
@@ -88,8 +88,8 @@ export default function Sidebar({ isCollapsed, onToggle }) {
                 href="/dashboard"
                 className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
                   isActive("/dashboard")
-                    ? "bg-red-50 text-red-600 border border-red-200"
-                    : "text-gray-700 hover:bg-gray-50"
+                    ? "bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                 }`}
               >
                 <LayoutDashboard className="h-5 w-5 flex-shrink-0" />
@@ -102,8 +102,8 @@ export default function Sidebar({ isCollapsed, onToggle }) {
                     href="/dashboard"
                     className={`flex items-center justify-center px-3 py-2 rounded-lg transition-colors ${
                       isActive("/dashboard")
-                        ? "bg-red-50 text-red-600 border border-red-200"
-                        : "text-gray-700 hover:bg-gray-50"
+                        ? "bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800"
+                        : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                     }`}
                   >
                     <LayoutDashboard className="h-5 w-5" />
@@ -121,8 +121,8 @@ export default function Sidebar({ isCollapsed, onToggle }) {
                   pathname === "/dashboard/workspace" ||
                   pathname === `/dashboard/workspace/${id}` ||
                   pathname.startsWith("/workspace/")
-                    ? "bg-red-50 text-red-600 border border-red-200"
-                    : "text-gray-700 hover:bg-gray-50"
+                    ? "bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                 }`}
               >
                 <FolderOpen className="h-5 w-5 flex-shrink-0" />
@@ -137,8 +137,8 @@ export default function Sidebar({ isCollapsed, onToggle }) {
                       pathname === "/dashboard/workspace" ||
                       pathname === `/dashboard/workspace/${id}` ||
                       pathname.startsWith("/workspace/")
-                        ? "bg-red-50 text-red-600 border border-red-200"
-                        : "text-gray-700 hover:bg-gray-50"
+                        ? "bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800"
+                        : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                     }`}
                   >
                     <FolderOpen className="w-5 h-5" />
@@ -152,7 +152,7 @@ export default function Sidebar({ isCollapsed, onToggle }) {
             {!isCollapsed ? (
               <Button
                 variant="ghost"
-                className="w-full justify-start space-x-3 px-3 py-2 h-auto text-gray-700 hover:bg-gray-50"
+                className="w-full justify-start space-x-3 px-3 py-2 h-auto text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
               >
                 <Crown className="w-5 h-5" />
                 <span className="font-medium">Upgrade</span>
@@ -162,7 +162,7 @@ export default function Sidebar({ isCollapsed, onToggle }) {
                 <TooltipTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="w-full justify-center px-3 py-2 h-auto text-gray-700 hover:bg-gray-50"
+                    className="w-full justify-center px-3 py-2 h-auto text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                   >
                     <Crown className="w-5 h-5" />
                   </Button>
@@ -181,16 +181,16 @@ export default function Sidebar({ isCollapsed, onToggle }) {
             variant="ghost"
             size="sm"
             onClick={onToggle}
-            className="md:flex hidden w-20 h-20 rounded-full hover:bg-gray-100 transition-all duration-200 [&_svg]:size-7"
+            className="md:flex hidden w-20 h-20 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 [&_svg]:size-7"
           >
-            <PanelLeftOpen />
+            <PanelLeftOpen className="text-gray-700 dark:text-gray-300" />
           </Button>
         )}
       </div>
 
       {/* ─── Bottom Section ─────────────────────────────────────── */}
       <div
-        className={`px-4 py-6 border-t border-gray-200 space-y-4 ${
+        className={`px-4 py-6 border-t border-gray-200 dark:border-gray-700 space-y-4 ${
           isCollapsed ? "px-2" : ""
         }`}
       >
@@ -198,8 +198,12 @@ export default function Sidebar({ isCollapsed, onToggle }) {
         {!isCollapsed ? (
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">PDFs uploaded</span>
-              <span className="text-gray-900 font-medium">2/5</span>
+              <span className="text-gray-600 dark:text-gray-400">
+                PDFs uploaded
+              </span>
+              <span className="text-gray-900 dark:text-gray-200 font-medium">
+                2/5
+              </span>
             </div>
             <Progress value={40} className="h-2" />
             <Button
@@ -215,8 +219,8 @@ export default function Sidebar({ isCollapsed, onToggle }) {
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="flex justify-center">
-                  <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
-                    <span className="text-xs font-medium text-red-600">
+                  <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/40 flex items-center justify-center">
+                    <span className="text-xs font-medium text-red-600 dark:text-red-400">
                       2/5
                     </span>
                   </div>
@@ -233,25 +237,23 @@ export default function Sidebar({ isCollapsed, onToggle }) {
             isCollapsed ? "justify-center" : "space-x-3"
           }`}
         >
-          {/* <Avatar className="h-8 w-8">
-            <AvatarImage src="https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2" />
-            <AvatarFallback>JD</AvatarFallback>
-          </Avatar> */}
           <UserButtonMenu />
 
           {!isCollapsed && (
             <>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-200 truncate">
                   john@example.com
                 </p>
-                <p className="text-xs text-gray-500">Free Plan</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Free Plan
+                </p>
               </div>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button variant="ghost" size="sm" className="p-1">
-                      <Settings className="h-4 w-4" />
+                      <Settings className="h-4 w-4 text-gray-700 dark:text-gray-300" />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>Go to Settings</TooltipContent>
@@ -268,14 +270,18 @@ export default function Sidebar({ isCollapsed, onToggle }) {
               <TooltipTrigger asChild>
                 <div className="flex justify-center">
                   <Button variant="ghost" size="sm" className="p-1">
-                    <Settings className="h-4 w-4" />
+                    <Settings className="h-4 w-4 text-gray-700 dark:text-gray-300" />
                   </Button>
                 </div>
               </TooltipTrigger>
               <TooltipContent side="right">
                 <div>
-                  <p className="font-medium">john@example.com</p>
-                  <p className="text-xs text-gray-500">Free Plan</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-200">
+                    john@example.com
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Free Plan
+                  </p>
                 </div>
               </TooltipContent>
             </Tooltip>
