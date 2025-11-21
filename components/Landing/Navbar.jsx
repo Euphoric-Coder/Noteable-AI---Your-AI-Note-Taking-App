@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X, FileText } from "lucide-react";
 import Link from "next/link";
+import { ModeToggle } from "../ThemeButton";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -38,6 +39,7 @@ export default function Navbar() {
             >
               Dashboard
             </Link>
+            <ModeToggle />
             <Button variant="ghost" size="sm" className="text-gray-700">
               Login
             </Button>
