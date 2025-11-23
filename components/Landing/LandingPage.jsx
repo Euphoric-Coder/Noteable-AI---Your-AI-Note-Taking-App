@@ -24,34 +24,6 @@ export default function Landing() {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-red-50 via-red-100/40 to-white dark:from-gray-900 dark:via-gray-800/40 dark:to-gray-900 py-20 lg:py-32">
-        {/* Top Wavy Background */}
-        <div className="absolute inset-0 opacity-90 dark:opacity-40">
-          {/* SVG stays same */}
-          <svg
-            className="absolute top-0 left-0 w-full h-full"
-            viewBox="0 0 1440 800"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M0,160L48,176C96,192,192,224,288,213.3C384,203,480,149,576,149.3C672,149,768,203,864,208C960,213,1056,171,1152,165.3C1248,160,1344,192,1392,208L1440,224V0H1392C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0H0V160Z"
-              fill="url(#topWave)"
-              fillOpacity="0.3"
-            />
-            <path
-              d="M0,320L48,298.7C96,277,192,235,288,229.3C384,224,480,256,576,272C672,288,768,288,864,277.3C960,267,1056,245,1152,245.3C1248,245,1344,267,1392,277.3L1440,288V0H1392C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0H0V320Z"
-              fill="url(#topWave)"
-              fillOpacity="0.2"
-            />
-            <defs>
-              <linearGradient id="topWave" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#fef2f2" />
-                <stop offset="50%" stopColor="#fee2e2" />
-                <stop offset="100%" stopColor="#ffffff" />
-              </linearGradient>
-            </defs>
-          </svg>
-        </div>
 
         {/* Dark transparent overlays */}
         <div className="absolute inset-0 bg-gradient-to-r from-red-100/30 to-red-50/20 dark:from-gray-800/30 dark:to-gray-700/20" />
