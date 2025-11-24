@@ -4,6 +4,8 @@ import { Menu, X, FileText } from "lucide-react";
 import Link from "next/link";
 import { ModeToggle } from "../ThemeButton";
 import { useUser, SignOutButton } from "@clerk/nextjs";
+import { UserButtonMenu } from "../UserButton";
+import Image from "next/image";
 
 export default function Navbar() {
   const { user, isSignedIn } = useUser();
@@ -17,10 +19,15 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <div className="p-2 bg-gradient-to-r from-red-400 to-pink-400 rounded-lg">
-              <FileText className="h-5 w-5 text-white" />
-            </div>
-            <span className="text-xl font-bold text-gray-900 dark:text-white">
+            <Image
+              src="/noteable.png"
+              alt="NoteAble AI Logo"
+              width={40}
+              height={40}
+              draggable={false}
+              className="drop-shadow-xl dark:drop-shadow-neon"
+            />
+            <span className="text-xl font-bold text-gray-900 dark:text-white hover:text-red-400 dark:hover:text-red-300 transition-colors">
               NoteAble AI
             </span>
           </Link>
@@ -77,6 +84,8 @@ export default function Navbar() {
                 <span className="text-gray-700 dark:text-gray-300 font-medium">
                   Welcome, {firstName} 👋
                 </span>
+
+                <UserButtonMenu />
 
                 <SignOutButton>
                   <Button
