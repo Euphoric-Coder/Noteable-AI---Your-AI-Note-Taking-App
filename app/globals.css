@@ -80,3 +80,44 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+.landing-wave {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+    line-height: 0;
+}
+
+.landing-wave svg {
+    position: relative;
+    display: block;
+    width: calc(112% + 1.3px);
+    height: 182px;
+}
+
+.landing-wave .shape-fill {
+    fill: #FFFFFF;
+}
+
+.landing-waveb {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+    line-height: 0;
+    transform: rotate(180deg);
+}
+
+.landing-waveb svg {
+    position: relative;
+    display: block;
+    width: calc(112% + 1.3px);
+    height: 182px;
+}
+
+.landing-waveb .shape-fill {
+    fill: #FFFFFF;
+}
