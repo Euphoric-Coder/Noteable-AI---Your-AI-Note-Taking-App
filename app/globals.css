@@ -43,6 +43,7 @@ body {
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
+     --wave-color: #FFFFFF;
   }
   .dark {
     --background: 222.2 84% 4.9%;
@@ -69,6 +70,7 @@ body {
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+    --wave-color: #0F172A;
   }
 }
 
@@ -98,7 +100,7 @@ body {
 }
 
 .landing-wave .shape-fill {
-    fill: #FFFFFF;
+    fill: var(--wave-color);
 }
 
 .landing-waveb {
@@ -119,5 +121,5 @@ body {
 }
 
 .landing-waveb .shape-fill {
-    fill: #FFFFFF;
+    fill: var(--wave-color);
 }

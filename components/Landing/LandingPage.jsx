@@ -28,7 +28,7 @@ export default function Landing() {
         <div className="absolute inset-0 bg-gradient-to-r from-red-100/30 to-red-50/20 dark:from-gray-800/30 dark:to-gray-700/20" />
         <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/40 to-transparent dark:via-gray-900/20" />
 
-        <div className="relative max-w-7xl mx-auto mb-20 px-4 sm:px-6 lg:px-8 text-center">
+        <div className="relative max-w-7xl mx-auto mb-32 px-4 sm:px-6 lg:px-8 text-center">
           <Badge
             variant="outline"
             className="mb-6 border-red-100 text-red-500 bg-white/80 dark:bg-gray-800/80 dark:border-gray-700 dark:text-red-300 backdrop-blur-sm shadow-sm"
@@ -228,7 +228,20 @@ export default function Landing() {
             </div>
           </div>
         </div>
-        <div className="landing-wave">
+        <div className="landing-wave dark:hidden">
+          <svg
+            data-name="Layer 1"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 1200 120"
+            preserveAspectRatio="none"
+          >
+            <path
+              d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z"
+              className="shape-fill"
+            ></path>
+          </svg>
+        </div>
+        <div className="landing-wave dark:block hidden">
           <svg
             data-name="Layer 1"
             xmlns="http://www.w3.org/2000/svg"
@@ -450,7 +463,20 @@ export default function Landing() {
 
       {/* CTA Section (dark enabled automatically because it's already red-based) */}
       <section className="py-20 bg-gradient-to-r from-red-400 to-red-500 dark:from-red-600 dark:to-red-700 relative overflow-hidden">
-        <div className="landing-waveb">
+        <div className="landing-waveb dark:hidden">
+          <svg
+            data-name="Layer 1"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 1200 120"
+            preserveAspectRatio="none"
+          >
+            <path
+              d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z"
+              className="shape-fill"
+            ></path>
+          </svg>
+        </div>
+        <div className="landing-waveb dark:block hidden">
           <svg
             data-name="Layer 1"
             xmlns="http://www.w3.org/2000/svg"
@@ -485,7 +511,20 @@ export default function Landing() {
           </Button>
         </div>
 
-        <div className="landing-wave">
+        <div className="landing-wave dark:hidden">
+          <svg
+            data-name="Layer 1"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 1200 120"
+            preserveAspectRatio="none"
+          >
+            <path
+              d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z"
+              className="shape-fill"
+            ></path>
+          </svg>
+        </div>
+        <div className="landing-wave dark:block hidden">
           <svg
             data-name="Layer 1"
             xmlns="http://www.w3.org/2000/svg"
